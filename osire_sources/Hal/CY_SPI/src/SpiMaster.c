@@ -136,6 +136,46 @@ cy_en_scb_spi_status_t CY_init_SPI_Master(void)
     /* Initialization completed */
     return(INIT_SUCCESS);
 }
+cy_en_scb_spi_status_t CY_deinit_SPI_Master(void)
+{
+//    cy_en_scb_spi_status_t result;
+//    cy_en_sysint_status_t sysSpistatus;
+
+    /* Configure the SPI block */
+    NVIC_DisableIRQ(mSPI_IRQ);
+    Cy_SCB_SPI_DeInit(mSPI_HW);
+
+    /* Set active slave select to line 0 */
+//    Cy_SCB_SPI_SetActiveSlaveSelect(mSPI_HW, CY_SCB_SPI_SLAVE_SELECT0);
+
+    /* Populate configuration structure */
+
+//    const cy_stc_sysint_t mSPI_SCB_IRQ_cfg =
+//    {
+//            .intrSrc      = mSPI_IRQ,
+//            .intrPriority = mSPI_INTR_PRIORITY
+//    };
+
+    /* Hook interrupt service routine and enable interrupt */
+//    sysSpistatus = Cy_SysInt_Init(&mSPI_SCB_IRQ_cfg, &mSPI_Interrupt);
+//    if(sysSpistatus != CY_SYSINT_SUCCESS)
+//    {
+//        return(INIT_FAILURE);
+//    }
+
+    /*Register the SPI Interrupt Callback*/
+//    Cy_SCB_SPI_RegisterCallback(mSPI_HW, mSPI_isr_callback, &mSPI_context);
+
+    /* Enable interrupt in NVIC */
+//    NVIC_EnableIRQ(mSPI_IRQ);
+//    NVIC_DisableIRQ(mSPI_IRQ);
+
+//    /* Enable the SPI Master block */
+//    Cy_SCB_SPI_Enable(mSPI_HW);
+
+    /* Initialization completed */
+    return(INIT_SUCCESS);
+}
 
 
 /*******************************************************************************

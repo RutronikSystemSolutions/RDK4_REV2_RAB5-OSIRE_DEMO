@@ -81,16 +81,6 @@
                         <Alias value="ARD_IO1"/>
                     </Aliases>
                 </Block>
-                <Block location="ioss[0].port[8].pin[1]">
-                    <Aliases>
-                        <Alias value="ARD_SPI_MISO"/>
-                    </Aliases>
-                </Block>
-                <Block location="ioss[0].port[8].pin[3]">
-                    <Aliases>
-                        <Alias value="SPI_CS"/>
-                    </Aliases>
-                </Block>
                 <Block location="ioss[0].port[11].pin[0]">
                     <Aliases>
                         <Alias value="CYBSP_LIN_RX"/>
@@ -569,9 +559,41 @@
                     </Parameters>
                 </Personality>
                 <Personality template="m0s8pin" version="2.0">
+                    <Block location="ioss[0].port[8].pin[1]" locked="true">
+                        <Aliases>
+                            <Alias value="ARD_SPI_MISO"/>
+                        </Aliases>
+                    </Block>
+                    <Parameters>
+                        <Param id="DriveModes" value="CY_GPIO_DM_HIGHZ"/>
+                        <Param id="inFlash" value="true"/>
+                        <Param id="initialState" value="1"/>
+                        <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
+                        <Param id="portLevelConfig" value="false"/>
+                        <Param id="slewRate" value="CY_GPIO_SLEW_SLOW"/>
+                        <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
+                    </Parameters>
+                </Personality>
+                <Personality template="m0s8pin" version="2.0">
                     <Block location="ioss[0].port[8].pin[2]" locked="true">
                         <Aliases>
                             <Alias value="ARD_SPI_SCK"/>
+                        </Aliases>
+                    </Block>
+                    <Parameters>
+                        <Param id="DriveModes" value="CY_GPIO_DM_STRONG_IN_OFF"/>
+                        <Param id="inFlash" value="true"/>
+                        <Param id="initialState" value="1"/>
+                        <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
+                        <Param id="portLevelConfig" value="false"/>
+                        <Param id="slewRate" value="CY_GPIO_SLEW_SLOW"/>
+                        <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
+                    </Parameters>
+                </Personality>
+                <Personality template="m0s8pin" version="2.0">
+                    <Block location="ioss[0].port[8].pin[3]" locked="true">
+                        <Aliases>
+                            <Alias value="SPI_CS"/>
                         </Aliases>
                     </Block>
                     <Parameters>
@@ -928,8 +950,16 @@
                     <Port name="scb[3].spi_mosi[0]"/>
                 </Net>
                 <Net>
+                    <Port name="ioss[0].port[8].pin[1].digital_inout[0]"/>
+                    <Port name="scb[3].spi_miso[0]"/>
+                </Net>
+                <Net>
                     <Port name="ioss[0].port[8].pin[2].digital_inout[0]"/>
                     <Port name="scb[3].spi_clk[0]"/>
+                </Net>
+                <Net>
+                    <Port name="ioss[0].port[8].pin[3].digital_inout[0]"/>
+                    <Port name="scb[3].spi_select0[0]"/>
                 </Net>
                 <Net>
                     <Port name="msc[1].msc[0].clock_msc[0]"/>

@@ -1,7 +1,7 @@
 /******************************************************************************
 * File Name:   main.c
 *
-* Description: This is the source code for the RDK4 Osire LEDs Demonstration
+* Description: This is the source code for the RDK4 RAB5-OSIRE Demonstration
 *              Application for ModusToolbox.
 *
 * Related Document: See README.md
@@ -58,11 +58,30 @@
 #include "Demos/DemoControl/inc/demoControl.h"
 #include <UartProtocol/inc/uartProtocolHandler.h>
 #include <Hal/Button/inc/button.h>
+#include "sbc_rab5_osire.h"
+#include <osireDevice.h>
 
 int main(void)
 {
+//	ospInitRsp_t rsp;
+//	osirePwmData_t dataPwm;
+//
+//	dataPwm.data.bit.blue_curr = 0;
+//	dataPwm.data.bit.green_curr = 0;
+//	dataPwm.data.bit.red_curr = 0;
+//	dataPwm.data.bit.blue_pwm  = 0x3fff;
+//	dataPwm.data.bit.green_pwm  = 0x3fff;
+//	dataPwm.data.bit.red_pwm  = 0x3fff;
+
 	/*Hardware initialisation*/
 	init_sys();
+
+//	osp_init_bidir (1, &rsp);
+//	osp_go_active(0);
+//  osp_osire_set_pwm (1, dataPwm);
+//	osp_osire_set_pwm (2, dataPwm);
+//	osp_said_set_curr (3);
+//	osp_said_set_pwm (3, dataPwm);
 
 	/*Main loop*/
 	for (;;)
@@ -70,6 +89,10 @@ int main(void)
 		button_polling();
 		demo_control();
 		uart_receive_new_msg();
+		sbc_rab5_osire_check_wdt();
+//		Cy_SysLib_Delay(100);
+//		osp_said_set_pwm (3, dataPwm);
+//		osp_said_set_pwm (3, dataPwm);
 	}
 }
 

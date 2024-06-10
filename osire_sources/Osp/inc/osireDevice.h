@@ -323,8 +323,9 @@ enum OSP_ERROR_CODE osp_osire_set_setup_and_sr (uint16_t deviceAddress,
  *
  * @return error, communication or command parameter error
  */
-enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
-                                       osirePwmData_t data);
+enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t data);
+enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, osirePwmData_t data);
+enum OSP_ERROR_CODE osp_said_set_curr (uint16_t deviceAddress);
 
 /**
  * @brief OSP_OSIRE_SET_PWM_SR command and reads status and temperature

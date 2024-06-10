@@ -32,6 +32,7 @@
 #include "nonBlock_spi_timer.h"
 #include "button_timer.h"
 #include "capsense_buttons.h"
+#include "sbc_rab5_osire.h"
 
 cyhal_crc_t crc_obj;
 
@@ -70,6 +71,12 @@ void init_sys(void)
 	{
 		CY_ASSERT(0);
 	}
+
+	/*Init SBC*/
+	__enable_irq();
+	sbc_rab5_osire_init();
+	sbc_spi_deinit();
+	__disable_irq();
 
 	/* Initialise the CRC Generator */
 	result = cyhal_crc_init(&crc_obj);

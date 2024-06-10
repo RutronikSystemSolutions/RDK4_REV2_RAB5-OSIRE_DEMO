@@ -31,8 +31,7 @@
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_set_setup (uint16_t deviceAddress,
-                                         osireSetSetupData_t data)
+enum OSP_ERROR_CODE osp_osire_set_setup (uint16_t deviceAddress, osireSetSetupData_t data)
 {
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
@@ -107,8 +106,7 @@ enum OSP_ERROR_CODE osp_osire_set_setup_and_sr (uint16_t deviceAddress,
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
-                                       osirePwmData_t data)
+enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t data)
 {
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
@@ -124,8 +122,89 @@ enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
       return ospErrorCode;
     }
 
-  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
-                                          ospCmd.outCmdBufferLength);
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,ospCmd.outCmdBufferLength);
+
+  if (spiError != NO_ERROR_SPI)
+    {
+      return OSP_ERROR_SPI;
+    }
+
+  return OSP_NO_ERROR;
+}
+
+/*****************************************************************************/
+/*****************************************************************************/
+#define MAX_CMD_BUFFER_SIZE 16
+static uint8_t cmdBuffer[MAX_CMD_BUFFER_SIZE];
+#define LENGTH_SET_SAID_PWM_MSG	12
+enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, osirePwmData_t data)
+{
+  ospCmdBuffer_t ospCmd;
+  errorSpi_t spiError;
+
+  memset (cmdBuffer, 0, MAX_CMD_BUFFER_SIZE);
+
+  ospCmd.inCmdId = OSP_OSIRE_SET_PWM;
+  ospCmd.inDeviceAddress = deviceAddress;
+  ospCmd.p_inParameter = &data.data.pwmData;
+
+  build_header (cmdBuffer, ospCmd.inDeviceAddress, ospCmd.inCmdId,LENGTH_SET_SAID_PWM_MSG);
+
+  osirePwmData_t *p_data;
+  p_data = (osirePwmData_t*) ospCmd.p_inParameter;
+  cmdBuffer[10] = p_data->data.pwmData[0];
+  cmdBuffer[9] = p_data->data.pwmData[1];
+  cmdBuffer[8] = p_data->data.pwmData[2];
+  cmdBuffer[7] = p_data->data.pwmData[3];
+  cmdBuffer[6] = p_data->data.pwmData[4];
+  cmdBuffer[5] = p_data->data.pwmData[5];
+  cmdBuffer[4] = 0;
+  cmdBuffer[3] = 0;
+
+  cmdBuffer[LENGTH_SET_SAID_PWM_MSG - 1] = crc (cmdBuffer,LENGTH_SET_SAID_PWM_MSG - 1);
+
+  ospCmd.outCmdBufferLength = LENGTH_SET_SAID_PWM_MSG;
+  ospCmd.p_outCmdBuffer = (uint8_t*) cmdBuffer;
+  ospCmd.outResponseLength = LENGTH_NO_OSP_RSP; // no response expected
+  ospCmd.outResponseMsg = NO_OSP_RSP; // no response expected
+
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,ospCmd.outCmdBufferLength);
+
+  if (spiError != NO_ERROR_SPI)
+    {
+      return OSP_ERROR_SPI;
+    }
+
+  return OSP_NO_ERROR;
+}
+
+#define LENGTH_SET_SAID_CURR_MSG	7
+enum OSP_ERROR_CODE osp_said_set_curr (uint16_t deviceAddress)
+{
+  ospCmdBuffer_t ospCmd;
+  errorSpi_t spiError;
+
+  uint8_t curr_ch[3] = {0x11, 0x81, 0x00};
+  memset (cmdBuffer, 0, MAX_CMD_BUFFER_SIZE);
+
+  ospCmd.inCmdId = 0x51;
+  ospCmd.inDeviceAddress = deviceAddress;
+  ospCmd.p_inParameter = curr_ch;
+
+  build_header (cmdBuffer, ospCmd.inDeviceAddress, ospCmd.inCmdId,LENGTH_SET_SAID_CURR_MSG);
+
+  cmdBuffer[5] = curr_ch[0];
+  cmdBuffer[4] = curr_ch[1];
+  cmdBuffer[3] = curr_ch[2];
+
+  cmdBuffer[LENGTH_SET_SAID_CURR_MSG - 1] = crc (cmdBuffer,LENGTH_SET_SAID_CURR_MSG - 1);
+
+  ospCmd.outCmdBufferLength = LENGTH_SET_SAID_CURR_MSG;
+  ospCmd.p_outCmdBuffer = (uint8_t*) cmdBuffer;
+  ospCmd.outResponseLength = LENGTH_NO_OSP_RSP; // no response expected
+  ospCmd.outResponseMsg = NO_OSP_RSP; // no response expected
+
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,ospCmd.outCmdBufferLength);
 
   if (spiError != NO_ERROR_SPI)
     {
@@ -392,8 +471,7 @@ enum OSP_ERROR_CODE osp_osire_read_tempstatus (uint16_t deviceAddress,
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_read_temp (uint16_t deviceAddress,
-                                         osireTemp_t *p_rsp)
+enum OSP_ERROR_CODE osp_osire_read_temp (uint16_t deviceAddress,osireTemp_t *p_rsp)
 {
   uint8_t rspBuffer[LENGTH_READ_TEMP_RSP]; // response buffer
   ospCmdBuffer_t ospCmd;
