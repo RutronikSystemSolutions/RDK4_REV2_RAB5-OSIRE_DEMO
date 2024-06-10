@@ -72,11 +72,8 @@ void init_sys(void)
 		CY_ASSERT(0);
 	}
 
-	/*Init SBC*/
-	__enable_irq();
+	/*Initialise the SBC*/
 	sbc_rab5_osire_init();
-	sbc_spi_deinit();
-	__disable_irq();
 
 	/* Initialise the CRC Generator */
 	result = cyhal_crc_init(&crc_obj);

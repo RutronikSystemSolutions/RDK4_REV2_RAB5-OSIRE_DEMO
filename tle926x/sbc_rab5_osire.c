@@ -49,6 +49,9 @@ void sbc_rab5_osire_init(void)
     cy_rslt_t result;
     SBC_ErrorCode sbc_err;
 
+    /*Enable the interrupts to be able to initialise the SBC*/
+    __enable_irq();
+
     /*Initialize SBC Interrupt Pin*/
     result = cyhal_gpio_init(INT_SBC, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, false);
     if (result != CY_RSLT_SUCCESS)
@@ -94,6 +97,10 @@ void sbc_rab5_osire_init(void)
     {
     	CY_ASSERT(0);
     }
+
+    /*Disable the SBC SPI and interrupts for further initialisations*/
+	sbc_spi_deinit();
+	__disable_irq();
 }
 
 void sbc_rab5_osire_check_wdt(void)
