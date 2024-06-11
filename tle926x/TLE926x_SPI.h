@@ -59,13 +59,6 @@
 /* ================================================================================ */
 /* =============================   SPI Functions     ============================== */
 /* ================================================================================ */
-/*RDK4 Adaptation*/
-#define RDK4_SPI_CS			SPI_CS
-#define RDK4_SPI_MOSI		ARD_SPI_MOSI
-#define RDK4_SPI_MISO		ARD_SPI_MISO
-#define RDK4_SPI_CLK		ARD_SPI_SCK
-#define RDK4_SPI_HANDLE		rdk4_spi_obj
-#define RDK4_SPI_FREQ		4800000UL /*SBC Max Frequency 4MHz*/
 
 /**
  * @brief   Initialize the SPI Interface with PDL Driver

@@ -138,30 +138,6 @@ uint8_t sbc_spi_init(void)
     /* Enable the SPI Master block */
     Cy_SCB_SPI_Enable(mSPI_HW);
 
-//	cy_rslt_t result = CY_RSLT_SUCCESS;
-
-//	/*SPI Initialization*/
-//	result = cyhal_spi_init(
-//			&RDK4_SPI_HANDLE,
-//			RDK4_SPI_MOSI,
-//			RDK4_SPI_MISO,
-//			RDK4_SPI_CLK,
-//			RDK4_SPI_CS,
-//			NULL,
-//			8,
-//			CYHAL_SPI_MODE_01_LSB,
-//			false);
-//    if(result != CY_RSLT_SUCCESS)
-//    {
-//  	  return 1;
-//    }
-//
-//    result = cyhal_spi_set_frequency(&RDK4_SPI_HANDLE, RDK4_SPI_FREQ);
-//    if(result != CY_RSLT_SUCCESS)
-//    {
-//    	return 1;
-//    }
-
 	return 0;
 }
 
@@ -181,8 +157,6 @@ uint16_t SBC_SPI_TRANSFER16(uint8_t Upper, uint8_t Lower)
 
 	spi_tx[0] = Upper;
 	spi_tx[1] = Lower;
-
-	//cyhal_spi_transfer(&RDK4_SPI_HANDLE, spi_tx, 2, spi_rx, 2, 0x00);
 
 	Cy_SCB_SPI_Transfer(mSPI_HW, spi_tx, spi_rx, 2, &scbSPI_context);
 
