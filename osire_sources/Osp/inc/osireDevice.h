@@ -87,6 +87,7 @@ extern "C"
  */
 enum OSP_OSIRE_DEVICE_CMDS
 {
+  OSP_OSIRE_IDENTIFY = 0x07, /**< implemented */
   OSP_OSIRE_P4ERROR_BIDIR = 0x08, /**< implemented */
   OSP_OSIRE_CLR_ERROR_SR = 0x21, /**< implemented */
   OSP_OSIRE_GO_SLEEP_SR = 0x24, /**< implemented */

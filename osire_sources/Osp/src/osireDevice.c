@@ -141,7 +141,7 @@ enum OSP_ERROR_CODE osp_said_indentify (uint16_t deviceAddress, uint32_t *id)
 
 	  memset (rspBuffer, 0, LENGTH_READ_INDENTIFY_RSP);
 
-	  ospCmd.inCmdId = 0x07;
+	  ospCmd.inCmdId = OSP_OSIRE_IDENTIFY;
 	  ospCmd.inDeviceAddress = deviceAddress;
 	  ospCmd.p_inParameter = NULL;
 
@@ -168,9 +168,6 @@ enum OSP_ERROR_CODE osp_said_indentify (uint16_t deviceAddress, uint32_t *id)
 
 	  *id = rspBuffer[6];
 
-//	  p_rsp->data.comStatus = rspBuffer[FIRST_BYTE_PAYLOAD];
-//
-//	  p_rsp->address = ((rspBuffer[0] & 0x0F) << 6) | ((rspBuffer[1] >> 2) & 0x3F);
 	  return OSP_NO_ERROR;
 }
 

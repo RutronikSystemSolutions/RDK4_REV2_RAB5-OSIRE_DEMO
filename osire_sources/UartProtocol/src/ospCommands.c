@@ -160,12 +160,36 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
             pwmData.data.bit.green_curr = 0;
             pwmData.data.bit.blue_curr = 0;
           }
-        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
-        if (ospErrorCode != OSP_NO_ERROR)
-          {
-            send_nack (hdr);
-            return;
-          }
+
+        /*RAB5 AS1163*/
+		if(deviceAddress == 3)
+		{
+			uint32_t id;
+			osp_said_indentify (3, &id);
+			if(id == 0x40)
+			{
+				osp_said_set_pwm(3, 0, pwmData);
+				osp_said_set_pwm(3, 1, pwmData);
+			}
+			else
+			{
+		        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
+		        if (ospErrorCode != OSP_NO_ERROR)
+		          {
+		            send_nack (hdr);
+		            return;
+		          }
+			}
+		}
+		else
+		{
+	        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
+	        if (ospErrorCode != OSP_NO_ERROR)
+	          {
+	            send_nack (hdr);
+	            return;
+	          }
+		}
 
         return;
       }
