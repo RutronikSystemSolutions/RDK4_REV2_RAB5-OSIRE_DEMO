@@ -68,7 +68,7 @@ void sbc_rab5_osire_init(void)
     	CY_ASSERT(0);
     }
 
-    /*Turn ON the 5V Power Supply VCC2 for the Display */
+    /*Turn ON the 5V Power Supply VCC2 */
     vcc2_supp = VCC2_ON_ALWAYS;
     sbc_err = sbc_switch_vcc2(vcc2_supp);
     if(sbc_err.flippedBitsMask)

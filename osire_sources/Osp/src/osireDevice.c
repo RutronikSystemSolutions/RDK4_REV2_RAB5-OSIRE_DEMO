@@ -132,12 +132,54 @@ enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t da
   return OSP_NO_ERROR;
 }
 
+enum OSP_ERROR_CODE osp_said_indentify (uint16_t deviceAddress, uint32_t *id)
+{
+	  uint8_t rspBuffer[LENGTH_READ_INDENTIFY_RSP]; // response buffer
+	  ospCmdBuffer_t ospCmd;
+	  enum OSP_ERROR_CODE ospErrorCode;
+	  errorSpi_t spiError;
+
+	  memset (rspBuffer, 0, LENGTH_READ_INDENTIFY_RSP);
+
+	  ospCmd.inCmdId = 0x07;
+	  ospCmd.inDeviceAddress = deviceAddress;
+	  ospCmd.p_inParameter = NULL;
+
+	  ospErrorCode = osp_cmd_buffer (&ospCmd);
+	  if (ospErrorCode != OSP_NO_ERROR)
+	    {
+	      return ospErrorCode;
+	    }
+
+	  spiError = send_and_receive_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
+	                                                      rspBuffer,
+	                                                      ospCmd.outCmdBufferLength,
+	                                                      ospCmd.outResponseLength);
+
+	  if (spiError != NO_ERROR_SPI)
+	    {
+	      return OSP_ERROR_SPI;
+	    }
+
+	  if (crc (rspBuffer, LENGTH_READ_INDENTIFY_RSP) != 0)
+	    {
+	      return OSP_ERROR_CRC;
+	    }
+
+	  *id = rspBuffer[6];
+
+//	  p_rsp->data.comStatus = rspBuffer[FIRST_BYTE_PAYLOAD];
+//
+//	  p_rsp->address = ((rspBuffer[0] & 0x0F) << 6) | ((rspBuffer[1] >> 2) & 0x3F);
+	  return OSP_NO_ERROR;
+}
+
 /*****************************************************************************/
 /*****************************************************************************/
 #define MAX_CMD_BUFFER_SIZE 16
 static uint8_t cmdBuffer[MAX_CMD_BUFFER_SIZE];
 #define LENGTH_SET_SAID_PWM_MSG	12
-enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, osirePwmData_t data)
+enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, uint8_t channel, osirePwmData_t data)
 {
   ospCmdBuffer_t ospCmd;
   errorSpi_t spiError;
@@ -159,7 +201,7 @@ enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, osirePwmData_t dat
   cmdBuffer[6] = p_data->data.pwmData[4];
   cmdBuffer[5] = p_data->data.pwmData[5];
   cmdBuffer[4] = 0;
-  cmdBuffer[3] = 0;
+  cmdBuffer[3] = channel;
 
   cmdBuffer[LENGTH_SET_SAID_PWM_MSG - 1] = crc (cmdBuffer,LENGTH_SET_SAID_PWM_MSG - 1);
 

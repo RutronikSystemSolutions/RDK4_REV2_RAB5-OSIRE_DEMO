@@ -119,6 +119,18 @@ void minimal_rgb_stripe_control (void)
               state = MIN_RGB_ERROR;
               break;
             }
+
+          /*RAB5 AS1163*/
+			if(countLed >= 3)
+			{
+				uint32_t id;
+				osp_said_indentify (3, &id);
+				if(id == 0x40)
+				{
+					osp_said_set_pwm(3, 0, dataPwm);
+					osp_said_set_pwm(3, 1, dataPwm);
+				}
+			}
         }
 
       colorTime++;

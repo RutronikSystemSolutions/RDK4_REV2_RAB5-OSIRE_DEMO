@@ -192,6 +192,31 @@ enum OSP_ERROR_CODE osp_cmd_buffer (ospCmdBuffer_t *p_cmdInfo)
 
         break;
       }
+    case (OSP_INDENTIFY):
+      {
+        if (p_cmdInfo->p_inParameter != NULL)
+          {
+            return OSP_ERROR_PARAMETER;
+          }
+        if ((p_cmdInfo->inDeviceAddress == BROADCAST_ADDRESS)
+            || (p_cmdInfo->inDeviceAddress > MAXIMUM_ADDRESS))
+          {
+            return OSP_ADDRESS_ERROR;
+          }
+
+        build_header (cmdBuffer, p_cmdInfo->inDeviceAddress, p_cmdInfo->inCmdId,
+        LENGTH_READ_INDENTIFY_MSG);
+
+        cmdBuffer[LENGTH_READ_INDENTIFY_MSG - 1] = crc (cmdBuffer,
+        LENGTH_READ_INDENTIFY_MSG - 1);
+
+        p_cmdInfo->outCmdBufferLength = LENGTH_READ_INDENTIFY_MSG;
+        p_cmdInfo->p_outCmdBuffer = (uint8_t*) cmdBuffer;
+        p_cmdInfo->outResponseLength = LENGTH_READ_INDENTIFY_RSP; // response expected
+        p_cmdInfo->outResponseMsg = OSP_RSP; // response expected
+
+        break;
+      }
 
     case (OSP_CLR_ERROR):
       {

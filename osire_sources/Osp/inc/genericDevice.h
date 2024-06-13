@@ -82,6 +82,7 @@ enum OSP_GENERIC_DEVICE_CMDS
   OSP_GO_SLEEP = 0x04, /**< implemented */
   OSP_GO_ACTIVE = 0x05, /**< implemented */
   OSP_GO_DEEP_SLEEP = 0x06, /**< implemented */
+  OSP_INDENTIFY = 0x07, /**< implemented */
 };
 
 /*****************************************************************************/

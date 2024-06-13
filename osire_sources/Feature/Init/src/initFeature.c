@@ -116,6 +116,16 @@ void init_led_feature_blocking(bool setActive, bool storeOtpToFlash, uint16_t *p
 		    {
 		    stateLedInit = LED_INIT_SET_SETUP;
 		    }
+			if(*p_countLed >= 3)
+			{
+				uint32_t id;
+				osp_said_indentify (3, &id);
+				if(id == 0x40)
+				{
+					osireTempStatus_t temp_status;
+					osp_osire_read_tempstatus (3, &temp_status);
+				}
+			}
 		}
 
 	    break;

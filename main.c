@@ -59,7 +59,7 @@
 #include <UartProtocol/inc/uartProtocolHandler.h>
 #include <Hal/Button/inc/button.h>
 #include "sbc_rab5_osire.h"
-#include <osireDevice.h>
+//#include <osireDevice.h>
 
 int main(void)
 {
