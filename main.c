@@ -1,7 +1,7 @@
 /******************************************************************************
 * File Name:   main.c
 *
-* Description: This is the source code for the RDK4 RAB5-OSIRE Demonstration
+* Description: This is the source code for the RDK4 Rev2 RAB5-OSIRE Demonstration
 *              Application for ModusToolbox.
 *
 * Related Document: See README.md
@@ -59,7 +59,6 @@
 #include <UartProtocol/inc/uartProtocolHandler.h>
 #include <Hal/Button/inc/button.h>
 #include "sbc_rab5_osire.h"
-//#include <osireDevice.h>
 
 int main(void)
 {
