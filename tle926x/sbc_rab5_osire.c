@@ -8,7 +8,7 @@
 #define WDT_FEED_INTERVAL_MS (500U)
 
 #include "sbc_rab5_osire.h"
-#include "SpiMaster.h"
+#include <amsOsram_sources/Hal/CY_SPI/inc/SpiMaster.h>
 #include "sys_timer.h"
 
 /*Priority for SBC interrupts*/

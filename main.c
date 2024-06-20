@@ -50,14 +50,15 @@
 * nevertheless used under real conditions, this is done at one’s responsibility;
 * any liability of Rutronik is insofar excluded
 *******************************************************************************/
-
 #include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
-#include <CY_System/inc/initSystem.h>
-#include "Demos/DemoControl/inc/demoControl.h"
-#include <UartProtocol/inc/uartProtocolHandler.h>
-#include <Hal/Button/inc/button.h>
+
+#include <amsOsram_sources/Demos/DemoControl/inc/demoControl.h>
+#include <amsOsram_sources/Hal/Button/inc/button.h>
+#include <amsOsram_sources/Hal/CY_System/inc/initSystem.h>
+#include <amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h>
+
 #include "sbc_rab5_osire.h"
 
 int main(void)
