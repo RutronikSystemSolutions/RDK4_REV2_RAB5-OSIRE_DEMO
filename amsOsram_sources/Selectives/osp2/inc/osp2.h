@@ -1,6 +1,6 @@
 // Selectives/osp2/inc/osp2.h
 /*****************************************************************************
- * Copyright 2024 by ams OSRAM AG                                            *
+ * Copyright 2022 by ams OSRAM AG                                            *
  * All rights are reserved.                                                  *
  *                                                                           *
  * IMPORTANT - PLEASE READ CAREFULLY BEFORE COPYING, INSTALLING OR USING     *
@@ -106,19 +106,9 @@ osp2_error_t osp2_exec_reset();                   // Sends a RESET telegram (wit
 osp2_error_t osp2_exec_resetinit(uint16_t *last, int *loop ); // Sends RESET/BIDIR telegrams, if that fails sends RESET/LOOP
 osp2_error_t osp2_exec_i2cenable_get(uint16_t addr, int *enable);// Reads OTP, and extracts I2C-ENABLE bit.
 osp2_error_t osp2_exec_i2cenable_set(uint16_t addr, int enable); // Reads OTP, updates I2C-ENABLE bit and writes it back to OTP (P2RAM cache actually).
-osp2_error_t osp2_exec_otpdump(uint16_t addr, int flags);        // Reads the whole SAID otp and prints private and customer area
+osp2_error_t osp2_exec_otpdump(uint16_t addr);    // Reads the whole SAID otp and prints private and customer area
 osp2_error_t osp2_exec_i2cwrite8(uint16_t addr, uint8_t daddr7, uint8_t raddr, uint8_t *buf, uint8_t count);// Writes count bytes from buf, into register raddr in i2c device daddr7, attached to node addr.
 osp2_error_t osp2_exec_i2cread8(uint16_t addr, uint8_t daddr7, uint8_t raddr, uint8_t *buf, uint8_t count); // Reads count bytes into buf, from register raddr in i2c device daddr7, attached to node addr.
-
-
-// `flags` for osp2_exec_otpdump determining what to print
-#define OSP2_OTPDUMP_RESERVED_HEX    0x01
-#define OSP2_OTPDUMP_CUSTOMER_HEX    0x02
-#define OSP2_OTPDUMP_RESERVED_FIELDS 0x04
-#define OSP2_OTPDUMP_CUSTOMER_FIELDS 0x08
-#define OSP2_OTPDUMP_HEX             (OSP2_OTPDUMP_RESERVED_HEX    | OSP2_OTPDUMP_CUSTOMER_HEX    )
-#define OSP2_OTPDUMP_FIELDS          (OSP2_OTPDUMP_RESERVED_FIELDS | OSP2_OTPDUMP_CUSTOMER_FIELDS )
-#define OSP2_OTPDUMP_ALL             (OSP2_OTPDUMP_HEX | OSP2_OTPDUMP_FIELDS  )
 
 
 // ==========================================================================
@@ -139,9 +129,9 @@ osp2_error_t osp2_send_reset(uint16_t addr ); // Telegram 00 RESET
 osp2_error_t osp2_send_clrerror(uint16_t addr); // Telegram 01 CLRERROR
 osp2_error_t osp2_send_initbidir(uint16_t addr, uint16_t * last, uint8_t * temp, uint8_t * stat );// Telegram 02 INITBIDIR
 osp2_error_t osp2_send_initloop(uint16_t addr, uint16_t * last, uint8_t * temp, uint8_t * stat );// Telegram 03 INITLOOP
-// Telegram 04 GOSLEEP
+osp2_error_t osp2_send_gosleep(uint16_t addr); // Telegram 04 GOSLEEP
 osp2_error_t osp2_send_goactive(uint16_t addr ); // Telegram 05 GOACTIVE
-// Telegram 06 GODEEPSLEEP
+osp2_error_t osp2_send_godeepsleep(uint16_t addr);// Telegram 06 GODEEPSLEEP
 osp2_error_t osp2_send_identify(uint16_t addr, uint32_t * id ); // Telegram 07 IDENTIFY
 // Telegram 08 P4ERRBIDIR
 // Telegram 09 P4ERRLOOP
@@ -220,8 +210,10 @@ osp2_error_t osp2_send_readcurchn(uint16_t addr, uint8_t chn, uint8_t *flags, ui
 osp2_error_t osp2_send_setcurchn(uint16_t addr, uint8_t chn, uint8_t flags, uint8_t rcur, uint8_t gcur, uint8_t bcur); // Telegram 51 SETCURCHN
 // Telegram 52 READTCOEFF
 // Telegram 53 SETTCOEFF
-// Telegram 54 READ_ADC
-// Telegram 55 SET_ADC
+
+osp2_error_t osp2_send_ADCread(uint16_t addr, uint8_t *adc);// Telegram 54 READ_ADC
+osp2_error_t osp2_send_setADC(uint16_t addr, uint8_t flags) ;// Telegram 55 SET_ADC
+
 #define OSP2_I2CCFG_FLAGS_INT      0x08 // status of INT pin
 #define OSP2_I2CCFG_FLAGS_12BIT    0x04 // uses 12 bit addressing mode
 #define OSP2_I2CCFG_FLAGS_NACK     0x02 // last i2c transaction ended with NACK
@@ -250,7 +242,7 @@ osp2_error_t osp2_send_readotp(uint16_t addr, uint8_t otpaddr, uint8_t * buf, in
 osp2_error_t osp2_send_setotp(uint16_t addr, uint8_t otpaddr, uint8_t * buf, int size); // Telegram 59 SETOTP
 // Telegram 5A TESTDATAREAD
 osp2_error_t osp2_send_settestdata(uint16_t addr, uint16_t data ); // Telegram 5B TESTDATASET
-// Telegram 5C READADCDAT
+osp2_error_t osp2_send_ADCdataread(uint16_t addr, uint16_t *adcdata); // Telegram 5C READADCDATA
 // Telegram 5D TESTSCAN
 osp2_error_t osp2_send_testpw(uint16_t addr, uint64_t pw); // Telegram 5F TESTPW
 // Telegram 6B SETOTTH with SR

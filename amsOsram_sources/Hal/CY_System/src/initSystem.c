@@ -33,6 +33,7 @@
 #include "button_timer.h"
 #include "capsense_buttons.h"
 #include "sbc_rab5_osire.h"
+#include "cy_retarget_io.h"
 
 cyhal_crc_t crc_obj;
 
@@ -81,6 +82,13 @@ void init_sys(void)
 	{
 		CY_ASSERT(0);
 	}
+
+    /*Enable debug output via LIN UART*/
+    result = cy_retarget_io_init( CYBSP_LIN_TX, CYBSP_LIN_RX, 115200);
+    if (result != CY_RSLT_SUCCESS)
+    {
+    	CY_ASSERT(0);
+    }
 
 	if (!sys_timer_init())
 	{

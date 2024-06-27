@@ -19,6 +19,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
+#include <stdio.h>
+#include <string.h>
 #include <osp2/inc/osp2.h>
 #include <topo/inc/topo.h>
 
@@ -69,13 +71,15 @@ static uint16_t topo_numi2cbridges_;
 static uint16_t topo_i2cbridge_addr_[TOPO_MAXI2CBRIDGES];
 
 
-#if 0
+
+#if 1
 // The function topo_isi2cbridge() categorizes a SAID as having an I2C bridge by using heuristics; as a side effect the I2C pads are powered
 static osp2_error_t topo_isi2cbridge(uint16_t addr, int*isbridge ) {
 
   // In the future, we only look at the I2C enable flag in OTP.
   osp2_error_t err;
   err = osp2_exec_i2cenable_get(addr, isbridge);
+
   if( err!=OSP2_ERROR_NONE ) return err;
   if( *isbridge ) {
     // Supply current to I2C pads (channel 2)
@@ -178,6 +182,7 @@ osp2_error_t topo_scan( uint16_t numnodes, int loop ) {
       // Is channel 2 of this SAID wired for I2C?
       int isbridge;
       osp2_error_t err = osp2_exec_i2cenable_get(addr, &isbridge );
+
       if( err!=OSP2_ERROR_NONE ) return err;
       if( isbridge ) {
         // Record the I2C bridge's address (if there is still space)
@@ -269,42 +274,39 @@ uint16_t topo_i2cbridge_addr( uint16_t bix ) {
 
 
 // Dumps (using dbg_printf) the topology (section triplets) of the scanned chain
-void topo_dump_triplets()
-{
-//  dbg_printf("topo: triplets %d\n", topo_numtriplets_ );
-//  uint16_t bix = 0;
-//  for( uint16_t tix=0; tix<topo_numtriplets_; tix++ ) {
-//    uint16_t addr = topo_triplet_addr_[tix];
-//    dbg_printf("T%d N%d", tix, addr );
-//    if( topo_triplet_onchan(tix) ) dbg_printf(".C%d", topo_triplet_chan(tix) );
-//    if( bix<topo_numi2cbridges_ && topo_i2cbridge_addr(bix)==addr ) { dbg_printf(" [I2C %d]",bix); bix++; }
-//    dbg_printf("\n");
-//  }
+void topo_dump_triplets() {
+  printf("topo: triplets %d\n", topo_numtriplets_ );
+  uint16_t bix = 0;
+  for( uint16_t tix=0; tix<topo_numtriplets_; tix++ ) {
+    uint16_t addr = topo_triplet_addr_[tix];
+    printf("T%d N%d", tix, addr );
+    if( topo_triplet_onchan(tix) ) printf(".C%d", topo_triplet_chan(tix) );
+    if( bix<topo_numi2cbridges_ && topo_i2cbridge_addr(bix)==addr ) { printf(" [I2C %d]",bix); bix++; }
+    printf("\n");
+  }
 }
 
 
 // Dumps (using dbg_printf) the topology (section nodes) of the scanned chain
-void topo_dump_nodes()
-{
-//  dbg_printf("topo: nodes %d\n", topo_numnodes_ );
-//  uint16_t bix = 0;
-//  for( uint16_t addr=1; addr<=topo_numnodes_; addr++ ) {
-//    dbg_printf("N%d (0x%lX)", addr,topo_node_id(addr) );
-//    for( uint16_t tix=topo_node_triplet1(addr); tix<topo_node_triplet1(addr)+topo_node_numtriplets(addr); tix++ )
-//      dbg_printf(" T%d",tix);
-//    if( bix<topo_numi2cbridges_ && topo_i2cbridge_addr(bix)==addr ) { dbg_printf(" [I2C %d]",bix); bix++; }
-//    dbg_printf("\n");
-//  }
+void topo_dump_nodes() {
+  printf("topo: nodes %d\n", topo_numnodes_ );
+  uint16_t bix = 0;
+  for( uint16_t addr=1; addr<=topo_numnodes_; addr++ ) {
+    printf("N%d (0x%lX)", addr,topo_node_id(addr) );
+    for( uint16_t tix=topo_node_triplet1(addr); tix<topo_node_triplet1(addr)+topo_node_numtriplets(addr); tix++ )
+      printf(" T%d",tix);
+    if( bix<topo_numi2cbridges_ && topo_i2cbridge_addr(bix)==addr ) { printf(" [I2C %d]",bix); bix++; }
+    printf("\n");
+  }
 }
 
 
 // Dumps (using dbg_printf) the topology (section i2cbridges) of the scanned chain
-void topo_dump_i2cbridges()
-{
-//  dbg_printf("topo: i2cbridges %d\n", topo_numi2cbridges_ );
-//  for( uint16_t bix=0; bix<topo_numi2cbridges_; bix++ ) {
-//    dbg_printf("I%d N%d\n", bix,topo_i2cbridge_addr(bix) );
-//  }
+void topo_dump_i2cbridges() {
+  printf("topo: i2cbridges %d\n", topo_numi2cbridges_ );
+  for( uint16_t bix=0; bix<topo_numi2cbridges_; bix++ ) {
+    printf("I%d N%d\n", bix,topo_i2cbridge_addr(bix) );
+  }
 }
 
 
@@ -369,21 +371,25 @@ osp2_error_t topo_stdinit() {
   // scan
   err=topo_scan(last,loop);
   if( err!=OSP2_ERROR_NONE ) return err;
-  // topo_dump_triplets();
-  // topo_dump_nodes();
-  // topo_dump_i2cbridges();
+   //topo_dump_triplets();
+   //topo_dump_nodes();
+   topo_dump_i2cbridges();
+
 
   return OSP2_ERROR_NONE;
 }
 
 
+
 // For each node: clears errors, enable CRC, power I2C pads, set current 24mA (except OSIREs), goactive
 osp2_error_t topo_stdsetup() {
   osp2_error_t err;
-
+  uint32_t addr = 0; //broadcast?
+  int isbridge;
   // Broadcast clear error (to clear the under voltage flag of all SAIDs), must have, otherwise SAID will not go ACTIVE
   err= osp2_send_clrerror(0);
-
+  err = osp2_exec_i2cenable_set(addr,1);
+  err= topo_isi2cbridge(addr, &isbridge);
   // Enable CRC for all nodes (could be skipped)
   for( uint16_t addr=1; addr<=topo_numnodes(); addr++ ) {
     if( topo_node_id(addr) == TOPO_ID_OSIRE ) {

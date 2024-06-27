@@ -13,6 +13,18 @@
                         <Alias value="CYBSP_CSD"/>
                     </Aliases>
                 </Block>
+                <Block location="ioss[0].port[0].pin[0]">
+                    <Aliases>
+                        <Alias value="I2C_SCL"/>
+                        <Alias value="CYBSP_I2C_SCL"/>
+                    </Aliases>
+                </Block>
+                <Block location="ioss[0].port[0].pin[1]">
+                    <Aliases>
+                        <Alias value="I2C_SDA"/>
+                        <Alias value="CYBSP_I2C_SDA"/>
+                    </Aliases>
+                </Block>
                 <Block location="ioss[0].port[0].pin[2]">
                     <Aliases>
                         <Alias value="CANFD_RX"/>
@@ -154,40 +166,6 @@
                         <Param id="configuration" value="auto"/>
                         <Param id="desiredFrequency" value="48.0000"/>
                         <Param id="sourceClock" value="ECO"/>
-                    </Parameters>
-                </Personality>
-                <Personality template="m0s8pin" version="2.0">
-                    <Block location="ioss[0].port[0].pin[0]" locked="true">
-                        <Aliases>
-                            <Alias value="I2C_SCL"/>
-                            <Alias value="CYBSP_I2C_SCL"/>
-                        </Aliases>
-                    </Block>
-                    <Parameters>
-                        <Param id="DriveModes" value="CY_GPIO_DM_OD_DRIVESLOW"/>
-                        <Param id="inFlash" value="true"/>
-                        <Param id="initialState" value="1"/>
-                        <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
-                        <Param id="portLevelConfig" value="false"/>
-                        <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
-                        <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
-                    </Parameters>
-                </Personality>
-                <Personality template="m0s8pin" version="2.0">
-                    <Block location="ioss[0].port[0].pin[1]" locked="true">
-                        <Aliases>
-                            <Alias value="I2C_SDA"/>
-                            <Alias value="CYBSP_I2C_SDA"/>
-                        </Aliases>
-                    </Block>
-                    <Parameters>
-                        <Param id="DriveModes" value="CY_GPIO_DM_OD_DRIVESLOW"/>
-                        <Param id="inFlash" value="true"/>
-                        <Param id="initialState" value="1"/>
-                        <Param id="isrTrigger" value="CY_GPIO_INTR_DISABLE"/>
-                        <Param id="portLevelConfig" value="false"/>
-                        <Param id="slewRate" value="CY_GPIO_SLEW_FAST"/>
-                        <Param id="vtrip" value="CY_GPIO_VTRIP_CMOS"/>
                     </Parameters>
                 </Personality>
                 <Personality template="m0s8pin" version="2.0">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="ilg.gnumcueclipse.debug.gdbjtag.openocd.launchConfigurationType">
-<stringAttribute key="com.cypress.studio.launch.owner.0" value="ab843e8a-30b0-4677-bd6a-eb54f191ceff"/>
+<stringAttribute key="com.cypress.studio.launch.owner.0" value="507757a4-eac2-405f-a3b5-40d471886418"/>
 <stringAttribute key="com.cypress.studio.launch.mode" value="run"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.doContinue" value="false"/>
 <booleanAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.doDebugInRam" value="false"/>
@@ -18,12 +18,12 @@
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerExecutable" value="${openocd_path}/${openocd_executable}"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerGdbPortNumber" value="3333"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerLog" value=""/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;-c &quot;set PSOC4_USE_ACQUIRE 1&quot;&#13;&#10;-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;source [find target/psoc4.cfg]&quot;&#13;&#10;-c &quot;if [catch {program ${cy_prj_path:ab843e8a-30b0-4677-bd6a-eb54f191ceff}/build/APP_RDK4/Custom/rdk4-rev2-rab5-osire-demo.hex} ] { echo {** Program operation failed **} } else { echo {** Program operation completed successfully **} }&quot;&#13;&#10;-c &quot;reset_config srst_only;reset run;psoc4.dap dpreg 0x04 0x00;shutdown&quot;"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerOther" value="-s &quot;${openocd_path}/../scripts&quot;&#13;&#10;-c &quot;set PSOC4_USE_ACQUIRE 1&quot;&#13;&#10;-c &quot;source [find interface/kitprog3.cfg]&quot;&#13;&#10;-c &quot;source [find target/psoc4.cfg]&quot;&#13;&#10;-c &quot;if [catch {program ${cy_prj_path:507757a4-eac2-405f-a3b5-40d471886418}/build/APP_RDK4/Custom/rdk4-rev2-rab5-osire-demo.hex} ] { echo {** Program operation failed **} } else { echo {** Program operation completed successfully **} }&quot;&#13;&#10;-c &quot;reset_config srst_only;reset run;psoc4.dap dpreg 0x04 0x00;shutdown&quot;"/>
 <intAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.gdbServerTelnetPortNumber" value="4444"/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherInitCommands" value=""/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.otherRunCommands" value=""/>
 <stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.openocd.secondResetType" value="run"/>
-<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.svdPath" value="${cy_prj_path:ab843e8a-30b0-4677-bd6a-eb54f191ceff}/../mtb_shared/mtb-pdl-cat2/release-v2.11.0/devices/svd/psoc4100smax.svd"/>
+<stringAttribute key="ilg.gnumcueclipse.debug.gdbjtag.svdPath" value="${cy_prj_path:507757a4-eac2-405f-a3b5-40d471886418}/../mtb_shared/mtb-pdl-cat2/release-v2.11.0/devices/svd/psoc4100smax.svd"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.imageFileName" value=""/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.imageOffset" value=""/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.ipAddress" value="localhost"/>
@@ -47,7 +47,7 @@
 <booleanAttribute key="org.eclipse.cdt.dsf.gdb.UPDATE_THREADLIST_ON_SUSPEND" value="false"/>
 <intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
 <stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="${cy_prj_path:ab843e8a-30b0-4677-bd6a-eb54f191ceff}/build/APP_RDK4/Custom/rdk4-rev2-rab5-osire-demo.hex"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="${cy_prj_path:507757a4-eac2-405f-a3b5-40d471886418}/build/APP_RDK4/Custom/rdk4-rev2-rab5-osire-demo.hex"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="RDK4_REV2_RAB5-OSIRE_DEMO"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="true"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">

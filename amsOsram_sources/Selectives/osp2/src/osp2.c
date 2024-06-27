@@ -1,6 +1,6 @@
 // Selectives/osp2/src/osp2.c
 /*****************************************************************************
- * Copyright 2024 by ams OSRAM AG                                            *
+ * Copyright 2022 by ams OSRAM AG                                            *
  * All rights are reserved.                                                  *
  *                                                                           *
  * IMPORTANT - PLEASE READ CAREFULLY BEFORE COPYING, INSTALLING OR USING     *
@@ -19,11 +19,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include "cy_pdl.h"
-#include "cyhal.h"
-#include "cybsp.h"
+
 #include <string.h>
-#include <stdio.h> // snprintf
+#include <stdio.h>
 #include <Hal/CY_SPI/inc/spiGeneral.h>
 #include <Hal/Osire/inc/osire.h>
 #include <SwTimer/inc/swTimer.h>
@@ -267,47 +265,26 @@ free_resources:
 }
 
 
-// Reads the whole SAID OTP and prints reserved and customer area as requested in `flags`.
-osp2_error_t osp2_exec_otpdump(uint16_t addr, int flags)
-{
+// Reads the whole SAID otp and prints private and customer area
+osp2_error_t osp2_exec_otpdump(uint16_t addr) {
   #define OTPSIZE 0x20
   #define OTPSTEP 8
-  osp2_error_t   err=OSP2_ERROR_NONE;
-//  uint8_t        otp[OTPSIZE];
-//
-//  for( int otpaddr=0x00; otpaddr<OTPSIZE; otpaddr+=OTPSTEP ) {
-//    err= osp2_send_readotp(addr,otpaddr,otp+otpaddr,OTPSTEP);
-//    if( err!=OSP2_ERROR_NONE ) return err;
-//  }
-//
-//  if( flags && OSP2_OTPDUMP_RESERVED_FIELDS ) {
-//    flags |= OSP2_OTPDUMP_RESERVED_HEX;
-//    dbg_printf("Not yet implemented RESERVED_FIELDS, using RESERVED_HEX\n");
-//  }
-//
-//  if( flags && OSP2_OTPDUMP_RESERVED_HEX ) {
-//    dbg_printf("OTP 0x%02X:",0x00);
-//    for( int otpaddr=0x00; otpaddr<0x0D; otpaddr+=1 ) dbg_printf(" %02X",otp[otpaddr]);
-//    dbg_printf("\n");
-//  }
-//
-//  if( flags && OSP2_OTPDUMP_CUSTOMER_HEX ) {
-//    dbg_printf("OTP 0x%02X:",0x0D);
-//    for( int otpaddr=0x0D; otpaddr<0x20; otpaddr+=1 ) dbg_printf(" %02X",otp[otpaddr]);
-//    dbg_printf("\n");
-//  }
-//
-//  if( flags && OSP2_OTPDUMP_CUSTOMER_FIELDS ) {
-//    dbg_printf("CH_CLUSTERING     0D.7:5 %d\n", BITS_SLICE(otp[0x0D],5,8) );
-//    dbg_printf("HAPTIC_DRIVER     0D.4   %d\n", BITS_SLICE(otp[0x0D],4,5) );
-//    dbg_printf("SPI_MODE          0D.3   %d\n", BITS_SLICE(otp[0x0D],3,4) );
-//    dbg_printf("SYNC_PIN_EN       0D.2   %d\n", BITS_SLICE(otp[0x0D],2,3) );
-//    dbg_printf("STAR_NET_EN       0D.1   %d\n", BITS_SLICE(otp[0x0D],1,2) );
-//    dbg_printf("I2C_BRIDGE_EN     0D.0   %d\n", BITS_SLICE(otp[0x0D],0,1) );
-//    dbg_printf("OTP_ADDR_EN       0E.3   %d\n", BITS_SLICE(otp[0x0E],3,4) );
-//    dbg_printf("STAR_NET_OTP_ADDR 0E.2:0 %d (0x%03X)\n", BITS_SLICE(otp[0x0E],0,3), BITS_SLICE(otp[0x0E],0,3)<<7 );
-//  }
-//
+  osp2_error_t   err;
+  uint8_t        otp[OTPSIZE];
+
+  for( int otpaddr=0x00; otpaddr<OTPSIZE; otpaddr+=OTPSTEP ) {
+    err= osp2_send_readotp(addr,otpaddr,otp+otpaddr,OTPSTEP);
+    if( err!=OSP2_ERROR_NONE ) return err;
+  }
+
+  printf("OTP 0x%02X:",0x00);
+  for( int otpaddr=0x00; otpaddr<0x0D; otpaddr+=1 ) printf(" %02X",otp[otpaddr]);
+  printf("\n");
+
+  printf("OTP 0x%02X:",0x0D);
+  for( int otpaddr=0x0D; otpaddr<0x20; otpaddr+=1 ) printf(" %02X",otp[otpaddr]);
+  printf("\n");
+
   return err;
 }
 
@@ -325,7 +302,6 @@ osp2_error_t osp2_exec_i2cwrite8(uint16_t addr, uint8_t daddr7, uint8_t raddr, u
     err = osp2_send_readi2ccfg(addr,&flags,&speed);
     if( err!=OSP2_ERROR_NONE ) return err;
     Cy_SysLib_Delay(1);
-    //delay_ms(1);
     tries--;
   }
   // Was transaction successful
@@ -348,7 +324,6 @@ osp2_error_t osp2_exec_i2cread8(uint16_t addr, uint8_t daddr7, uint8_t raddr, ui
     err = osp2_send_readi2ccfg(addr,&flags,&speed);
     if( err!=OSP2_ERROR_NONE ) return err;
     Cy_SysLib_Delay(1);
-    //delay_ms(1);
     tries--;
   }
   // Was transaction successful
@@ -461,13 +436,13 @@ osp2_error_t osp2_send_reset(uint16_t addr) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("reset(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n");
-//  };
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("reset(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n");
+  };
 
   return error;
 }
@@ -512,13 +487,13 @@ osp2_error_t osp2_send_clrerror(uint16_t addr) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("clrerror(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n");
-//  };
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("clrerror(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n");
+  };
 
   return error;
 }
@@ -584,18 +559,18 @@ osp2_error_t osp2_send_initbidir(uint16_t addr, uint16_t * last, uint8_t * temp,
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("initbidir(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" last=0x%02X=%d temp=0x%02X=%d stat=0x%02X=%s",  *last, *last,
-//      *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
-//    dbg_printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("initbidir(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" last=0x%02X=%d temp=0x%02X=%d stat=0x%02X=%s",  *last, *last,
+      *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
+    printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
+  }
 
   return error;
 }
@@ -661,18 +636,18 @@ osp2_error_t osp2_send_initloop(uint16_t addr, uint16_t * last, uint8_t * temp, 
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("initloop(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" last=0x%02X=%d temp=0x%02X=%d stat=0x%02X=%s",  *last, *last,
-//      *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
-//    dbg_printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("initloop(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" last=0x%02X=%d temp=0x%02X=%d stat=0x%02X=%s",  *last, *last,
+      *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
+    printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
+  }
 
   return error;
 }
@@ -680,7 +655,53 @@ osp2_error_t osp2_send_initloop(uint16_t addr, uint16_t * last, uint8_t * temp, 
 
 // ==========================================================================
 // Telegram 04 GOSLEEP
+static osp2_error_t osp2_con_gosleep(osp2_tele_t * tele, uint16_t addr) {
+  // Check input parameters
+  if( tele==0                   ) return OSP2_ERROR_OUTARGNULL;
+  if( addr    > MAXIMUM_ADDRESS ) return OSP2_ERROR_ADDR;
 
+  // Set constants
+  const uint8_t payloadsize = 0;
+  const uint8_t tid = 0x04; // GOSLEEP
+  //if( respsize ) *respsize = 4+0;
+
+  // Build telegram
+  tele->size    = payloadsize+4;
+
+  tele->data[0] = 0xA0 | BITS_SLICE(addr,6,10);
+  tele->data[1] = BITS_SLICE(addr,0,6)<<2 | BITS_SLICE(PSI(payloadsize),1,3);
+  tele->data[2] = BITS_SLICE(PSI(payloadsize),0,1)<<7 | tid;
+
+  tele->data[3] = crc( tele->data , tele->size - 1 );
+
+  return OSP2_ERROR_NONE;
+}
+
+
+osp2_error_t osp2_send_gosleep(uint16_t addr) {
+	  // Telegram and error vars
+	  osp2_tele_t     tele;
+	  osp2_error_t    error    = OSP2_ERROR_NONE;
+	  osp2_error_t    con_error= OSP2_ERROR_NONE;
+	  errorSpi_t      spi_error= NO_ERROR_SPI;
+
+	  // Construct, send and optionally destruct
+	  con_error = osp2_con_gosleep(&tele,addr);
+	  if( con_error!=OSP2_ERROR_NONE ) error=con_error;
+	  if(     error==OSP2_ERROR_NONE ) spi_error = send_data_over_spi_blocking(tele.data,tele.size);
+	  if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
+
+	  // Log
+	  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+	    printf("gosleep(0x%03X)",addr);
+	    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+	    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+	      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+	    printf("\n");
+	  };
+
+	  return error;
+	}
 
 // ==========================================================================
 // Telegram 05 GOACTIVE
@@ -722,13 +743,13 @@ osp2_error_t osp2_send_goactive(uint16_t addr) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("goactive(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n");
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("goactive(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n");
+  }
 
   return error;
 }
@@ -738,7 +759,53 @@ osp2_error_t osp2_send_goactive(uint16_t addr) {
 // ==========================================================================
 // Telegram 06 GODEEPSLEEP
 
+static osp2_error_t osp2_con_godeepsleep(osp2_tele_t * tele, uint16_t addr) {
+  // Check input parameters
+  if( tele==0                   ) return OSP2_ERROR_OUTARGNULL;
+  if( addr    > MAXIMUM_ADDRESS ) return OSP2_ERROR_ADDR;
 
+  // Set constants
+  const uint8_t payloadsize = 0;
+  const uint8_t tid = 0x06; // GOSLEEP
+  //if( respsize ) *respsize = 4+0;
+
+  // Build telegram
+  tele->size    = payloadsize+4;
+
+  tele->data[0] = 0xA0 | BITS_SLICE(addr,6,10);
+  tele->data[1] = BITS_SLICE(addr,0,6)<<2 | BITS_SLICE(PSI(payloadsize),1,3);
+  tele->data[2] = BITS_SLICE(PSI(payloadsize),0,1)<<7 | tid;
+
+  tele->data[3] = crc( tele->data , tele->size - 1 );
+
+  return OSP2_ERROR_NONE;
+}
+
+
+osp2_error_t osp2_send_godeepsleep(uint16_t addr) {
+	  // Telegram and error vars
+	  osp2_tele_t     tele;
+	  osp2_error_t    error    = OSP2_ERROR_NONE;
+	  osp2_error_t    con_error= OSP2_ERROR_NONE;
+	  errorSpi_t      spi_error= NO_ERROR_SPI;
+
+	  // Construct, send and optionally destruct
+	  con_error = osp2_con_godeepsleep(&tele,addr);
+	  if( con_error!=OSP2_ERROR_NONE ) error=con_error;
+	  if(     error==OSP2_ERROR_NONE ) spi_error = send_data_over_spi_blocking(tele.data,tele.size);
+	  if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
+
+	  // Log
+	  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+	    printf("godeepsleep(0x%03X)",addr);
+	    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+	    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+	      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+	    printf("\n");
+	  };
+
+	  return error;
+	}
 // ==========================================================================
 // Telegram 07 IDENTIFY
 static osp2_error_t osp2_con_identify(osp2_tele_t * tele, uint16_t addr, uint8_t * respsize) {
@@ -797,16 +864,16 @@ osp2_error_t osp2_send_identify(uint16_t addr, uint32_t * id) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("identify(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" id=0x%08lX\n",*id);
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("identify(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" id=0x%08lX\n",*id);
+  }
 
   return error;
 }
@@ -860,13 +927,13 @@ osp2_error_t osp2_send_sync(uint16_t addr) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("sync(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n");
-//  };
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("sync(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n");
+  };
 
   return error;
 }
@@ -928,13 +995,13 @@ osp2_error_t osp2_send_i2cread8(uint16_t addr, uint8_t daddr7, uint8_t raddr, ui
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("i2cread(0x%03X,0x%02X,0x%02X,%d)",addr,daddr7,raddr,num );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("i2cread(0x%03X,0x%02X,0x%02X,%d)",addr,daddr7,raddr,num );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -989,13 +1056,13 @@ osp2_error_t osp2_send_i2cwrite8(uint16_t addr, uint8_t daddr7, uint8_t raddr, u
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("i2cwrite(0x%03X,0x%02X,0x%02X,%s)",addr,daddr7,raddr,osp2_buf_str(buf,size));
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("i2cwrite(0x%03X,0x%02X,0x%02X,%s)",addr,daddr7,raddr,osp2_buf_str(buf,size));
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -1060,16 +1127,16 @@ osp2_error_t osp2_send_readlast(uint16_t addr, uint8_t * buf, int size) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readlast(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" i2c %s\n", osp2_buf_str(buf,size) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readlast(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" i2c %s\n", osp2_buf_str(buf,size) );
+  }
 
   return error;
 }
@@ -1150,17 +1217,17 @@ osp2_error_t osp2_send_readstat(uint16_t addr, uint8_t * stat) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readstat(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" stat=0x%02X=%s", *stat, osp2_stat_said_str(*stat) );
-//    dbg_printf(" (%s)\n", osp2_stat_osire_str(*stat) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readstat(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" stat=0x%02X=%s", *stat, osp2_stat_said_str(*stat) );
+    printf(" (%s)\n", osp2_stat_osire_str(*stat) );
+  }
 
   return error;
 }
@@ -1225,17 +1292,17 @@ osp2_error_t osp2_send_readtempstat(uint16_t addr, uint8_t * temp, uint8_t * sta
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readtempstat(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" temp=0x%02X=%d stat=0x%02X=%s", *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
-//    dbg_printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readtempstat(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" temp=0x%02X=%d stat=0x%02X=%s", *temp, osp2_temp_said(*temp), *stat, osp2_stat_said_str(*stat) );
+    printf(" (%d, %s)\n",  osp2_temp_osire(*temp), osp2_stat_osire_str(*stat) );
+  }
 
   return error;
 }
@@ -1299,18 +1366,18 @@ osp2_error_t osp2_send_readcomst(uint16_t addr, uint8_t * com) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    // Log
-//    dbg_printf("readcomst(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" com=0x%02X=%s", *com, osp2_com_said_str(*com) );
-//    dbg_printf(" (%s)\n", osp2_com_osire_str(*com) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    // Log
+    printf("readcomst(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" com=0x%02X=%s", *com, osp2_com_said_str(*com) );
+    printf(" (%s)\n", osp2_com_osire_str(*com) );
+  }
 
   return error;
 }
@@ -1380,17 +1447,17 @@ osp2_error_t osp2_send_readtemp(uint16_t addr, uint8_t * temp) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readtemp(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" temp=0x%02X=%d", *temp, osp2_temp_said(*temp) );
-//    dbg_printf(" (%d)\n", osp2_temp_osire(*temp) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readtemp(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" temp=0x%02X=%d", *temp, osp2_temp_said(*temp) );
+    printf(" (%d)\n", osp2_temp_osire(*temp) );
+  }
 
   return error;
 }
@@ -1460,16 +1527,16 @@ osp2_error_t osp2_send_readsetup(uint16_t addr, uint8_t *flags ) {
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readsetup(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" flags=0x%02X=%s\n", *flags, osp2_setup_str(*flags) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readsetup(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" flags=0x%02X=%s\n", *flags, osp2_setup_str(*flags) );
+  }
 
   return error;
 }
@@ -1516,13 +1583,13 @@ osp2_error_t osp2_send_setsetup(uint16_t addr, uint8_t flags) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("setsetup(0x%03X,0x%02X)",addr,flags);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setsetup(0x%03X,0x%02X)",addr,flags);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -1591,16 +1658,16 @@ osp2_error_t osp2_send_readpwm(uint16_t addr, uint16_t *red, uint16_t *green, ui
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readpwm(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" rgb=%s\n", osp2_pwm_osire_str(*red,*green,*blue,*daytimes) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readpwm(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" rgb=%s\n", osp2_pwm_osire_str(*red,*green,*blue,*daytimes) );
+  }
 
   return error;
 }
@@ -1669,16 +1736,16 @@ osp2_error_t osp2_send_readpwmchn(uint16_t addr, uint8_t chn, uint16_t *red, uin
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readpwmchn(0x%03X,%X)",addr,chn);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" rgb=%s\n", osp2_pwm_said_str(*red,*green,*blue) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readpwmchn(0x%03X,%X)",addr,chn);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" rgb=%s\n", osp2_pwm_said_str(*red,*green,*blue) );
+  }
 
   return error;
 }
@@ -1734,13 +1801,13 @@ osp2_error_t osp2_send_setpwm(uint16_t addr, uint16_t red, uint16_t green, uint1
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("setpwm(0x%03X,0x%04X,0x%04X,0x%04X,%X)",addr,red,green,blue,daytimes);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setpwm(0x%03X,0x%04X,0x%04X,0x%04X,%X)",addr,red,green,blue,daytimes);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -1796,13 +1863,13 @@ osp2_error_t osp2_send_setpwmchn(uint16_t addr, uint8_t chn, uint16_t red, uint1
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("setpwmchn(0x%03X,%X,0x%04X,0x%04X,0x%04X)",addr,chn,red,green,blue);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setpwmchn(0x%03X,%X,0x%04X,0x%04X,0x%04X)",addr,chn,red,green,blue);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -1872,16 +1939,16 @@ osp2_error_t osp2_send_readcurchn(uint16_t addr, uint8_t chn, uint8_t *flags, ui
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readcurchn(0x%03X,%X)",addr,chn);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" flags=%s rcur=%X gcur=%X bcur=%X\n", osp2_curchn_str(*flags), *rcur,*gcur,*bcur );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readcurchn(0x%03X,%X)",addr,chn);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" flags=%s rcur=%X gcur=%X bcur=%X\n", osp2_curchn_str(*flags), *rcur,*gcur,*bcur );
+  }
 
   return error;
 }
@@ -1894,9 +1961,9 @@ static osp2_error_t osp2_con_setcurchn(osp2_tele_t * tele, uint16_t addr, uint8_
   if( tele==0                    ) return OSP2_ERROR_OUTARGNULL;
   if( addr   > MAXIMUM_ADDRESS   ) return OSP2_ERROR_ADDR;
   if( flags  & ~0x07             ) return OSP2_ERROR_ADDR;
-  if( rcur   & ~0x07             ) return OSP2_ERROR_ADDR;
-  if( gcur   & ~0x07             ) return OSP2_ERROR_ADDR;
-  if( bcur   & ~0x07             ) return OSP2_ERROR_ADDR;
+  if( rcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
+  if( gcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
+  if( bcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
   if( chn!=0 && chn!=1 && chn!=2 ) return OSP2_ERROR_ARG;
 
   // Set constants
@@ -1936,13 +2003,13 @@ osp2_error_t osp2_send_setcurchn(uint16_t addr, uint8_t chn, uint8_t flags, uint
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("setcurchn(0x%03X,%X,%s,%X,%X,%X)",addr,chn,osp2_curchn_str(flags),rcur,gcur,bcur);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setcurchn(0x%03X,%X,%s,%X,%X,%X)",addr,chn,osp2_curchn_str(flags),rcur,gcur,bcur);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -1951,9 +2018,131 @@ osp2_error_t osp2_send_setcurchn(uint16_t addr, uint8_t chn, uint8_t flags, uint
 // ==========================================================================
 // Telegram 52 READ_T_COEFF
 // Telegram 53 SET_T_COEFF
+// ==========================================================================
 // Telegram 54 READ_ADC
-// Telegram 55 SET_ADC
+static osp2_error_t osp2_con_ADCread(osp2_tele_t * tele, uint16_t addr, uint8_t * respsize) {
+  // Check input parameters
+  if( tele==0                   ) return OSP2_ERROR_OUTARGNULL;
+  if( addr    > MAXIMUM_ADDRESS ) return OSP2_ERROR_ADDR;
 
+  // Set constants
+  const uint8_t payloadsize = 0;
+  const uint8_t tid = 0x54; // READADC
+  if( respsize ) *respsize = 4+1; // ADC read
+
+  // Build telegram
+  tele->size    = payloadsize+4;
+
+  tele->data[0] = 0xA0 | BITS_SLICE(addr,6,10);
+  tele->data[1] = BITS_SLICE(addr,0,6)<<2 | BITS_SLICE(PSI(payloadsize),1,3);
+  tele->data[2] = BITS_SLICE(PSI(payloadsize),0,1)<<7 | tid;
+
+  tele->data[3] = crc( tele->data , tele->size - 1 );
+
+  return OSP2_ERROR_NONE;
+}
+
+
+static osp2_error_t osp2_des_ADCread(osp2_tele_t *tele, uint8_t *adc) {
+  // Check telegram consistency
+  if( tele==0 || adc==0                  ) return OSP2_ERROR_OUTARGNULL;
+  if( BITS_SLICE(tele->data[0],4,8)!=0xA  ) return OSP2_ERROR_TELEFIELD; // PREAMBLE
+  if( BITS_SLICE(tele->data[2],0,7)!=0x54 ) return OSP2_ERROR_TELEFIELD; // TID
+  if( tele->size!= 4+1                    ) return OSP2_ERROR_TELEFIELD;
+  if( crc(tele->data,tele->size) != 0     ) return OSP2_ERROR_CRC;
+
+  // Get fields
+  *adc = tele->data[3];
+
+  return OSP2_ERROR_NONE;
+}
+
+
+osp2_error_t osp2_send_ADCread(uint16_t addr, uint8_t *adc) {
+  // Telegram and error vars
+  osp2_tele_t     tele;
+  osp2_tele_t     resp;
+  osp2_error_t    error    = OSP2_ERROR_NONE;
+  osp2_error_t    con_error= OSP2_ERROR_NONE;
+  errorSpi_t      spi_error= NO_ERROR_SPI;
+  osp2_error_t    des_error= OSP2_ERROR_NONE;
+
+  // Construct, send and optionally destruct
+  con_error = osp2_con_ADCread(&tele,addr,&resp.size);
+  if( con_error!=OSP2_ERROR_NONE ) error=con_error;
+  if(     error==OSP2_ERROR_NONE ) spi_error = send_and_receive_data_over_spi_blocking(tele.data,resp.data,tele.size,resp.size);
+  if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
+  if(     error==OSP2_ERROR_NONE ) des_error = osp2_des_ADCread(&resp, adc);
+  if( des_error!=OSP2_ERROR_NONE ) error=des_error;
+
+  // Log
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readADC(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" adc read = 0x%02X", *adc);
+    printf(" (%d)\n", osp2_temp_osire(*adc) );
+  }
+
+  return error;
+}
+
+// ==========================================================================
+// Telegram 55 SET_ADC
+//
+static osp2_error_t osp2_con_setADC(osp2_tele_t * tele, uint16_t addr, uint8_t flags) {
+  // Check input parameters
+  if( tele==0               ) return OSP2_ERROR_OUTARGNULL;
+  if( addr> MAXIMUM_ADDRESS ) return OSP2_ERROR_ADDR;
+
+  // Set constants
+  const uint8_t payloadsize = 1;
+  const uint8_t tid = 0x55; // SETADC
+  //if( respsize ) *respsize = 4+0;
+
+  // Build telegram
+  tele->size    = payloadsize+4;
+
+  tele->data[0] = 0xA0 | BITS_SLICE(addr,6,10);
+  tele->data[1] = BITS_SLICE(addr,0,6)<<2 | BITS_SLICE(PSI(payloadsize),1,3);
+  tele->data[2] = BITS_SLICE(PSI(payloadsize),0,1)<<7 | tid;
+
+  tele->data[3] = flags;
+
+  tele->data[4] = crc( tele->data , tele->size - 1 );
+
+  return OSP2_ERROR_NONE;
+}
+
+
+osp2_error_t osp2_send_setADC(uint16_t addr, uint8_t flags) {
+  // Telegram and error vars
+  osp2_tele_t     tele;
+  osp2_error_t    error    = OSP2_ERROR_NONE;
+  osp2_error_t    con_error= OSP2_ERROR_NONE;
+  errorSpi_t      spi_error= NO_ERROR_SPI;
+
+  // Construct, send and optionally destruct
+  con_error = osp2_con_setADC(&tele, addr, flags);
+  if( con_error!=OSP2_ERROR_NONE ) error=con_error;
+  if(     error==OSP2_ERROR_NONE ) spi_error = send_data_over_spi_blocking(tele.data,tele.size);
+  if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
+
+  // Log
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setadc(0x%03X,0x%02X)",addr,flags);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
+
+  return error;
+}
 
 // ==========================================================================
 // Telegram 56 READI2CCFG
@@ -2014,16 +2203,16 @@ osp2_error_t osp2_send_readi2ccfg(uint16_t addr, uint8_t *flags, uint8_t *speed 
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readi2ccfg(0x%03X)",addr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" flags=0x%02X=%s speed=0x%02X=%d\n", *flags, osp2_i2ccfg_str(*flags), *speed, osp2_i2ccfg_speed(*speed) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readi2ccfg(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" flags=0x%02X=%s speed=0x%02X=%d\n", *flags, osp2_i2ccfg_str(*flags), *speed, osp2_i2ccfg_speed(*speed) );
+  }
 
   return error;
 }
@@ -2073,13 +2262,13 @@ osp2_error_t osp2_send_seti2ccfg(uint16_t addr, uint8_t flags, uint8_t speed ) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("seti2ccfg(0x%03X,0x%02X,0x%02X)",addr,flags,speed);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("seti2ccfg(0x%03X,0x%02X,0x%02X)",addr,flags,speed);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -2148,16 +2337,16 @@ osp2_error_t osp2_send_readotp(uint16_t addr, uint8_t otpaddr, uint8_t * buf, in
   if( des_error!=OSP2_ERROR_NONE ) error=des_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("readotp(0x%03X,0x%02X)",addr,otpaddr);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//      else if( des_error!=OSP2_ERROR_NONE ) dbg_printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
-//    dbg_printf(" ->" );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
-//    dbg_printf(" otp 0x%02X: %s\n", otpaddr, osp2_buf_str(buf,size) );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("readotp(0x%03X,0x%02X)",addr,otpaddr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" otp 0x%02X: %s\n", otpaddr, osp2_buf_str(buf,size) );
+  }
 
   return error;
 }
@@ -2217,13 +2406,13 @@ osp2_error_t osp2_send_setotp(uint16_t addr, uint8_t otpaddr, uint8_t * buf, int
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("setotp(0x%03X,0x%02X,%s)",addr,otpaddr,osp2_buf_str(buf,size) );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("setotp(0x%03X,0x%02X,%s)",addr,otpaddr,osp2_buf_str(buf,size) );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
@@ -2232,6 +2421,76 @@ osp2_error_t osp2_send_setotp(uint16_t addr, uint8_t otpaddr, uint8_t * buf, int
 // ==========================================================================
 // Telegram 5A READTESTDATA
 
+static osp2_error_t osp2_con_ADCdataread(osp2_tele_t * tele, uint16_t addr, uint8_t * respsize) {
+  // Check input parameters
+  if( tele==0                   ) return OSP2_ERROR_OUTARGNULL;
+  if( addr    > MAXIMUM_ADDRESS ) return OSP2_ERROR_ADDR;
+
+  // Set constants
+  const uint8_t payloadsize = 0;
+  const uint8_t tid = 0x5C; // READ DATA ADC
+  if( respsize ) *respsize = 4+2; // ADC data read
+
+  // Build telegram
+  tele->size    = payloadsize+4;
+
+  tele->data[0] = 0xA0 | BITS_SLICE(addr,6,10);
+  tele->data[1] = BITS_SLICE(addr,0,6)<<2 | BITS_SLICE(PSI(payloadsize),1,3);
+  tele->data[2] = BITS_SLICE(PSI(payloadsize),0,1)<<7 | tid;
+
+  tele->data[3] = crc( tele->data , tele->size - 1 );
+
+  return OSP2_ERROR_NONE;
+}
+
+
+static osp2_error_t osp2_des_ADCdataread(osp2_tele_t *tele, uint16_t *adcdata) {
+  // Check telegram consistency
+  if( tele==0 || adcdata==0                  ) return OSP2_ERROR_OUTARGNULL;
+  if( BITS_SLICE(tele->data[0],4,8)!=0xA  ) return OSP2_ERROR_TELEFIELD; // PREAMBLE
+  if( BITS_SLICE(tele->data[2],0,7)!=0x5C ) return OSP2_ERROR_TELEFIELD; // TID
+  if( tele->size!= 4+2                    ) return OSP2_ERROR_TELEFIELD;
+  if( crc(tele->data,tele->size) != 0     ) return OSP2_ERROR_CRC;
+
+  // Get fields
+  *adcdata = (uint16_t) (tele->data[3]) << 8 | (uint16_t) (tele->data[4]);
+
+  return OSP2_ERROR_NONE;
+}
+
+
+osp2_error_t osp2_send_ADCdataread(uint16_t addr, uint16_t *adcdata) {
+  // Telegram and error vars
+  osp2_tele_t     tele;
+  osp2_tele_t     resp;
+  osp2_error_t    error    = OSP2_ERROR_NONE;
+  osp2_error_t    con_error= OSP2_ERROR_NONE;
+  errorSpi_t      spi_error= NO_ERROR_SPI;
+  osp2_error_t    des_error= OSP2_ERROR_NONE;
+
+  // Construct, send and optionally destruct
+  con_error = osp2_con_ADCdataread(&tele,addr,&resp.size);
+  if( con_error!=OSP2_ERROR_NONE ) error=con_error;
+  if(     error==OSP2_ERROR_NONE ) spi_error = send_and_receive_data_over_spi_blocking(tele.data,resp.data,tele.size,resp.size);
+  if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
+  if(     error==OSP2_ERROR_NONE ) des_error = osp2_des_ADCdataread(&resp, adcdata);
+  if( des_error!=OSP2_ERROR_NONE ) error=des_error;
+
+  // Log
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+  printf("readDataADC(0x%03X)",addr);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+      else if( des_error!=OSP2_ERROR_NONE ) printf(" [destructor ERROR %s]", osp2_error_str(des_error) );
+    printf(" ->" );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [resp %s]",osp2_buf_str(resp.data,resp.size));
+    printf(" adc data read = 0x%02X \n", *adcdata);
+////    dbg_printf(" (%d)\n", osp2_temp_osire(*adc) );
+  }
+
+  return error;
+}
 
 
 
@@ -2277,20 +2536,22 @@ osp2_error_t osp2_send_settestdata(uint16_t addr, uint16_t data ) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("settestdata(0x%03X,0x%04X)",addr,data);
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("settestdata(0x%03X,0x%04X)",addr,data);
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
 
 
 // ==========================================================================
-// Telegram 5C READ_ADC_DAT
+// Telegram 5C READ_ADC_DATA
+
+
 // Telegram 5D TESTSCAN
 
 
@@ -2336,13 +2597,13 @@ osp2_error_t osp2_send_testpw(uint16_t addr, uint64_t pw) {
   if( spi_error!=NO_ERROR_SPI    ) error=(osp2_error_t)spi_error;
 
   // Log
-//  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
-//    dbg_printf("testpw(0x%03X,%s)",addr,osp2_buf_str(&pw,6) );
-//    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) dbg_printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
-//    if( con_error!=OSP2_ERROR_NONE ) dbg_printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
-//      else if( spi_error!=NO_ERROR_SPI ) dbg_printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
-//    dbg_printf("\n" );
-//  }
+  if( osp2_log_level >= OSP2_LOG_LEVEL_ARG ) {
+    printf("testpw(0x%03X,%s)",addr,osp2_buf_str(&pw,6) );
+    if( osp2_log_level >= OSP2_LOG_LEVEL_TELE ) printf(" [tele %s]",osp2_buf_str(tele.data,tele.size));
+    if( con_error!=OSP2_ERROR_NONE ) printf(" [constructor ERROR %s]", osp2_error_str(con_error) );
+      else if( spi_error!=NO_ERROR_SPI ) printf(" [SPI ERROR %s]", osp2_error_str((osp2_error_t)spi_error) );
+    printf("\n" );
+  }
 
   return error;
 }
