@@ -26,7 +26,7 @@ extern "C"
   {
 #endif
 
-#include "../../../amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h"
+#include <UartProtocol/inc/uartProtocolHandler.h>
 
 enum UART_CONFIG_CMDS
 {

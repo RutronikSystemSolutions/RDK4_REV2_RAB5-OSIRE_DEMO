@@ -23,15 +23,18 @@
  * 
  */
 //#noch keine Antwort-IDs implementiert
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Hal/CY_SPI/inc/spiGeneral.h>
-#include <amsOsram_sources/Osp/inc/osireDevice.h>
-#include <amsOsram_sources/Osp/inc/ospCmdBuffer.h>
+#include <Crc/inc/crc.h>
+#include <Hal/CY_SPI/inc/spiGeneral.h>
+#include <Osp/inc/osireDevice.h>
+#include <Osp/inc/ospCmdBuffer.h>
 #include <string.h>
+
+#include <Hal/CY_SPI/inc/spiGeneral.h>
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_set_setup (uint16_t deviceAddress, osireSetSetupData_t data)
+enum OSP_ERROR_CODE osp_osire_set_setup (uint16_t deviceAddress,
+                                         osireSetSetupData_t data)
 {
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
@@ -106,7 +109,8 @@ enum OSP_ERROR_CODE osp_osire_set_setup_and_sr (uint16_t deviceAddress,
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t data)
+enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
+                                       osirePwmData_t data)
 {
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
@@ -122,7 +126,8 @@ enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t da
       return ospErrorCode;
     }
 
-  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,ospCmd.outCmdBufferLength);
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
+                                          ospCmd.outCmdBufferLength);
 
   if (spiError != NO_ERROR_SPI)
     {
@@ -130,45 +135,6 @@ enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t da
     }
 
   return OSP_NO_ERROR;
-}
-
-enum OSP_ERROR_CODE osp_said_indentify (uint16_t deviceAddress, uint32_t *id)
-{
-	  uint8_t rspBuffer[LENGTH_READ_INDENTIFY_RSP]; // response buffer
-	  ospCmdBuffer_t ospCmd;
-	  enum OSP_ERROR_CODE ospErrorCode;
-	  errorSpi_t spiError;
-
-	  memset (rspBuffer, 0, LENGTH_READ_INDENTIFY_RSP);
-
-	  ospCmd.inCmdId = OSP_OSIRE_IDENTIFY;
-	  ospCmd.inDeviceAddress = deviceAddress;
-	  ospCmd.p_inParameter = NULL;
-
-	  ospErrorCode = osp_cmd_buffer (&ospCmd);
-	  if (ospErrorCode != OSP_NO_ERROR)
-	    {
-	      return ospErrorCode;
-	    }
-
-	  spiError = send_and_receive_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
-	                                                      rspBuffer,
-	                                                      ospCmd.outCmdBufferLength,
-	                                                      ospCmd.outResponseLength);
-
-	  if (spiError != NO_ERROR_SPI)
-	    {
-	      return OSP_ERROR_SPI;
-	    }
-
-	  if (crc (rspBuffer, LENGTH_READ_INDENTIFY_RSP) != 0)
-	    {
-	      return OSP_ERROR_CRC;
-	    }
-
-	  *id = rspBuffer[6];
-
-	  return OSP_NO_ERROR;
 }
 
 /*****************************************************************************/
@@ -428,7 +394,8 @@ enum OSP_ERROR_CODE osp_osire_read_tempstatus (uint16_t deviceAddress,
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_read_temp (uint16_t deviceAddress,osireTemp_t *p_rsp)
+enum OSP_ERROR_CODE osp_osire_read_temp (uint16_t deviceAddress,
+                                         osireTemp_t *p_rsp)
 {
   uint8_t rspBuffer[LENGTH_READ_TEMP_RSP]; // response buffer
   ospCmdBuffer_t ospCmd;

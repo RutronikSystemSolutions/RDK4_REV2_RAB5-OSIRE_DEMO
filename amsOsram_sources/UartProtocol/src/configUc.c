@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Common/inc/osireEvkDefines.h>
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Demos/MinimalRgbStripe/inc/minimalRgbStripe.h>
-#include <amsOsram_sources/Hal/CY_Uart/inc/uart.h>
-#include <amsOsram_sources/UartProtocol/inc/configUc.h>
-#include <amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h>
+#include <Common/inc/osireEvkDefines.h>
+#include <Crc/inc/crc.h>
+#include <Hal/CY_Uart/inc/uart.h>
+#include <UartProtocol/inc/configUc.h>
+#include <UartProtocol/inc/uartProtocolHandler.h>
+#include <Demos/MinimalRgbStripe/inc/minimalRgbStripe.h>
 
 #define POSITION_OFFSET_CONFIG 4
 

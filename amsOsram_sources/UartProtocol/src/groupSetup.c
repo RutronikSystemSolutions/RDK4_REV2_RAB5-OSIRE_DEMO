@@ -18,9 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Demos/DemoControl/inc/demoControl.h>
-#include <amsOsram_sources/UartProtocol/inc/groupSetup.h>
+#include <Demos/DemoControl/inc/demoControl.h>
 #include <stdint.h>
+#include <UartProtocol/inc/groupSetup.h>
 
 #define OFFSET_COMMAND_AFTER_HEADER 3
 #define MAX_ALLOWED_LENGHT_COMMAND_CHANGE_SETUP 8
@@ -63,7 +63,36 @@ setupCommandsErrorCode_t change_setup (uint8_t *p_msg, uartHeader_t hdr)
           }
         case UART_COMMAND_SET_UPDATE_EXAMPLE_MODE:
           {
-        	  break;
+//            //if commando = 0;
+//            setupCommandUpdateExample_t command = *(p_msg
+//                + OFFSET_COMMAND_AFTER_HEADER + OFFSET_COMMAND_MODI);
+//
+//            if (command == UART_COMMAND_UPDATE_EXAMPLE_START_DEMO_DEFAULT_COLOR)
+//              {
+//                start_update_example_mode (command, 0, 0, 0);
+//              }
+//            else
+//              {
+//                volatile uint16_t temp[3];
+//                uint8_t pos = 0;
+//                volatile float tempFloat[3];
+//
+//                for (uint8_t i = 0; i < 3; i++)
+//                  {
+//                    pos = i * 2 + 1;
+//                    temp[i] = (*(p_msg + OFFSET_COMMAND_AFTER_HEADER + pos + 1)
+//                        << 8);
+//                    temp[i] = temp[i]
+//                        + (*(p_msg + OFFSET_COMMAND_AFTER_HEADER + pos + 2));
+//                  }
+//
+//                tempFloat[0] = ((float) temp[0]) / UPDATE_EXAMPLE_VALUE_CODING;
+//                tempFloat[1] = ((float) temp[1]) / UPDATE_EXAMPLE_VALUE_CODING;
+//                tempFloat[2] = (float) temp[2];
+//
+//                start_update_example_mode (command, tempFloat[0], tempFloat[1],
+//                                           tempFloat[2]);
+//              }
           }
           break;
         default:

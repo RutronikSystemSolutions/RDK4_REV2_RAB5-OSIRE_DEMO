@@ -18,33 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#ifndef UARTPROTOCOL_INC_PASSTHROUGH_H_
-#define UARTPROTOCOL_INC_PASSTHROUGH_H_
+#ifndef UARTPROTOCOL_INC_OSPFUNCTIONS_H_
+#define UARTPROTOCOL_INC_OSPFUNCTIONS_H_
 
-#ifdef __cplusplus
-extern "C"
-  {
-#endif
-
-#include <stdint.h>
-#include <stdbool.h>
 #include <UartProtocol/inc/uartProtocolHandler.h>
 
-/**
- * @brief Passthrough UART Message to microcontroller
- *
- * The received UART message contains the information whether the microcontroller expects an
- * answer from the LED. A response from the LED is output directly UART
- *
- * @param p_msg, Pointer to respose message via UART
- * @param hdr, Passes the header information of the received UART message
- */
+#define MULTIPLEADCREAD 0x01
 
-void passthrough (uint8_t *p_msg, uartHeader_t hdr);
 
-#ifdef __cplusplus
-}
-#endif
+void osp_functions (uint8_t *p_msg, uartHeader_t hdr);
 
-#endif /* UARTPROTOCOL_INC_PASSTHROUGH_H_ */
 
+
+
+
+
+#endif /* UARTPROTOCOL_INC_OSPFUNCTIONS_H_ */

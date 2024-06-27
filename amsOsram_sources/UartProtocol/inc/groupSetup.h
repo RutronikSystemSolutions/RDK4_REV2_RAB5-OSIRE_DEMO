@@ -26,7 +26,7 @@ extern "C"
 #ifndef UART_PROTOCOL_INC_GROUP_SETUP_H_
 #define UART_PROTOCOL_INC_GROUP_SETUP_H_
 
-#include "../../../amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h"
+#include <UartProtocol/inc/uartProtocolHandler.h>
 
 typedef enum
 {

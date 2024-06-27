@@ -125,7 +125,7 @@ void minimal_rgb_stripe_control (void)
 			if(countLed >= 3)
 			{
 				uint32_t id;
-				osp_said_indentify (3, &id);
+				osp2_send_identify(3, &id);
 				if(id == 0x40)
 				{
 					osp2_send_setpwmchn(3,0,dataPwm.data.bit.red_pwm,dataPwm.data.bit.green_pwm,dataPwm.data.bit.blue_pwm);//address,channel,redpwm,greenpwm,bluepwm

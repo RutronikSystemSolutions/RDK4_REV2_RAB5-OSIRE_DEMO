@@ -22,9 +22,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "../../../amsOsram_sources/Osp/inc/genericDevice.h"
-
+#include <Osp/inc/genericDevice.h>
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -44,8 +42,6 @@ typedef struct ospCmd_t
 
 /*****************************************************************************/
 /*****************************************************************************/
-
 enum OSP_ERROR_CODE osp_cmd_buffer (ospCmdBuffer_t *p_cmdInfo);
-
 
 #endif /* OSP_INC_OSPCMDBUFFER_H_ */

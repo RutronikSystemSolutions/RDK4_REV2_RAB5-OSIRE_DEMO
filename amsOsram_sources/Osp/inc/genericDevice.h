@@ -82,7 +82,19 @@ enum OSP_GENERIC_DEVICE_CMDS
   OSP_GO_SLEEP = 0x04, /**< implemented */
   OSP_GO_ACTIVE = 0x05, /**< implemented */
   OSP_GO_DEEP_SLEEP = 0x06, /**< implemented */
-  OSP_INDENTIFY = 0x07, /**< implemented */
+  OSP_SET_PWM = 0x07,
+  OSP_READ_PWM = 0x1A,
+  OSP_SET_PWM_OS = 0x20,
+  OSP_IDENTIFY = 0x0A,
+  OSP_READTEMP = 0x0B,
+  OSP_READADC = 0x0C,
+  OSP_SETADC = 0x0D,
+  OSP_READCURRCHANNEL = 0x0E,
+  OSP_SETCURRCHANNEL = 0x0F,
+  OSP_READSTATUS = 0x10,
+  OSP_CLRERROR = 0x11,
+  OSP_READADCDATA = 0x12,
+  OSP_READTEMPSTAT = 0x13,
 };
 
 /*****************************************************************************/

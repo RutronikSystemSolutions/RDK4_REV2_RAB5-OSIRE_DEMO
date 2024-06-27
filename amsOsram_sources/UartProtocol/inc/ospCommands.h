@@ -21,8 +21,8 @@
 #ifndef UARTPROTOCOL_INC_OSPCOMMANDS_H_
 #define UARTPROTOCOL_INC_OSPCOMMANDS_H_
 
-#include "../../../amsOsram_sources/Osp/inc/osireDevice.h"
-#include "../../../amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h"
+#include <Osp/inc/osireDevice.h>
+#include <UartProtocol/inc/uartProtocolHandler.h>
 
 #define OSP_OSIRE_READ_OTP_COMPLETE 0x80
 
@@ -32,10 +32,14 @@
 #define LENGTH_UART_OTP_COMPLETE 35
 #define LENGTH_UART_SETUP_READ 4
 #define LENGTH_UART_TEMP_STATUS 5
+#define LENGTH_UART_ID 2
 #define LENGTH_UART_STATUS 4
 #define LENGTH_UART_TEMP 4
 #define LENGHT_UART_COM_STATUS 4
 #define LENGTH_UART_LED_STATUS 4
+#define LENGTH_UART_STD 2
+#define LENGTH_UART_16bit 3
+#define LENGTH_UART_PWM 7
 
 #define LENGTH_UART_OTTH_READ 6
 
@@ -55,5 +59,7 @@
 void osp_commands (uint8_t *p_msg, uartHeader_t hdr);
 
 void send_uart_temp_status (uartHeader_t hdr, osireTempStatus_t tempStatus);
+
+void send_uart_identify (uartHeader_t hdr, uint8_t id);
 
 #endif /* UARTPROTOCOL_INC_OSPCOMMANDS_H_ */

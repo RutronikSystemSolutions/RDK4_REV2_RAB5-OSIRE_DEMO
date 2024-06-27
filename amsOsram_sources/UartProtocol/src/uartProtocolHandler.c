@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Hal/CY_Uart/inc/genericUart.h>
-#include <amsOsram_sources/Hal/CY_Uart/inc/uart.h>
-#include <amsOsram_sources/UartProtocol/inc/configUc.h>
-#include <amsOsram_sources/UartProtocol/inc/groupSetup.h>
-#include <amsOsram_sources/UartProtocol/inc/ospCommands.h>
-#include <amsOsram_sources/UartProtocol/inc/passthrough.h>
-#include <amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h>
+#include <Crc/inc/crc.h>
+#include <Hal/CY_Uart/inc/uart.h>
 #include <string.h>
+#include <UartProtocol/inc/configUc.h>
+#include <UartProtocol/inc/groupSetup.h>
+#include <UartProtocol/inc/ospCommands.h>
+#include <UartProtocol/inc/ospFunctions.h>
+#include <UartProtocol/inc/passthrough.h>
+#include <UartProtocol/inc/uartProtocolHandler.h>
 
 void uart_receive_new_msg (void)
 {
@@ -39,13 +39,14 @@ void uart_receive_new_msg (void)
       uint8_t *p_uartbuffer;
       p_uartbuffer = get_working_buffer (&sizeOfWorkingBuffer);
       uart_protocol_handler (uartStatus, p_uartbuffer);
+
     }
 }
 
 void uart_protocol_handler (rxUartStatus_t rxUartStatus, uint8_t *p_msg)
 {
   uartHeader_t hdr;
-  memcpy (hdr.buf, p_msg, 4);
+  memcpy (hdr.buf, p_msg, 17);
 
   uartStatus_t uartStatus;
   uartStatus.status = 0;
@@ -56,12 +57,12 @@ void uart_protocol_handler (rxUartStatus_t rxUartStatus, uint8_t *p_msg)
       send_ack (hdr, uartStatus);
       return;
     }
-  if (crc (p_msg, (hdr.bit.length + 4)) != 0) // Check if CRC is right
-    {
-      uartStatus.bit.crc_err = 1;
-      send_ack (hdr, uartStatus);
-      return;
-    }
+//  if (crc (p_msg, (hdr.bit.length + 4)) != 0) // Check if CRC is right
+//    {
+//      uartStatus.bit.crc_err = 1;
+//      send_ack (hdr, uartStatus);
+//      return;
+//    }
 
   if (hdr.bit.deviceID == BROADCAST_ID) // Broadcast for Device_ID
     {
@@ -124,6 +125,10 @@ void uart_protocol_handler (rxUartStatus_t rxUartStatus, uint8_t *p_msg)
 
     case GROUP_OSPCOMMANDS:
       osp_commands (p_msg, hdr);
+      return;
+
+    case GROUP_FUNCTIONS:
+      osp_functions (p_msg, hdr);
       return;
 
     case GROUP_FEATURECOMMANDS:
@@ -192,7 +197,7 @@ void send_ack (uartHeader_t hdr, uartStatus_t uartStatus)
 
 void send_nack (uartHeader_t hdr)
 {
-  uint8_t buffer[LENGTH_OSP_ERROR];
+  uint8_t buffer[LENGTH_OSP_ERROR+1];
   buffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
   buffer[UART_MSG_GROUP] = GROUP_OSP_ERROR;
   buffer[UART_MSG_LENGTH] = LENGTH_OSP_ERROR_LENGTH_BYTE;
@@ -204,6 +209,7 @@ void send_nack (uartHeader_t hdr)
     {
       buffer[UART_MSG_DATA0] = hdr.bit.byte_3;
     }
-  buffer[LENGTH_OSP_ERROR - 1] = crc (buffer, LENGTH_OSP_ERROR - 1);
-  uart_send_data_blocking (buffer, LENGTH_OSP_ERROR);
+  buffer[UART_MSG_DATA0+1] = 0xFF;
+  buffer[LENGTH_OSP_ERROR] = crc (buffer, LENGTH_OSP_ERROR);
+  uart_send_data_blocking (buffer, LENGTH_OSP_ERROR+1);
 }

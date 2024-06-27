@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Hal/CY_SPI/inc/spiGeneral.h>
-#include <amsOsram_sources/Hal/CY_Uart/inc/uart.h>
-#include <amsOsram_sources/UartProtocol/inc/passthrough.h>
-#include <amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h>
+#include <Crc/inc/crc.h>
+#include <Hal/CY_SPI/inc/spiGeneral.h>
+#include <Hal/CY_Uart/inc/uart.h>
 #include <string.h>
+#include <UartProtocol/inc/passthrough.h>
+#include <UartProtocol/inc/uartProtocolHandler.h>
 
 void passthrough (uint8_t *p_msg, uartHeader_t hdr)
 {

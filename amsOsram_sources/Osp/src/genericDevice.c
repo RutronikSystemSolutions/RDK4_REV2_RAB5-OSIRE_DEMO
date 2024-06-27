@@ -18,17 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Hal/CY_SPI/inc/spiGeneral.h>
-#include <amsOsram_sources/Osp/inc/genericDevice.h>
-#include <amsOsram_sources/Osp/inc/ospCmdBuffer.h>
+#include <Common/inc/osireEvkDefines.h>
+#include <Crc/inc/crc.h>
+#include <Hal/CY_SPI/inc/spiGeneral.h>
+#include <Osp/inc/genericDevice.h>
+#include <Osp/inc/ospCmdBuffer.h>
 #include <string.h>
 
 /*****************************************************************************/
 /*****************************************************************************/
 enum OSP_ERROR_CODE osp_init_bidir (uint16_t deviceAddress, ospInitRsp_t *p_rsp)
 {
-  uint8_t rspBuffer[LENGTH_INIT_RSP]; // response buffer *A.Heder: for SPI Slave Buffer
+  uint8_t rspBuffer[LENGTH_INIT_RSP]; // response buffer
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
   errorSpi_t spiError;
@@ -36,19 +37,20 @@ enum OSP_ERROR_CODE osp_init_bidir (uint16_t deviceAddress, ospInitRsp_t *p_rsp)
   // clear response buffer
   memset (rspBuffer, 0, LENGTH_INIT_RSP);
 
-  //prepare message
   ospCmd.inCmdId = OSP_INIT_BIDIR;
   ospCmd.inDeviceAddress = deviceAddress;
   ospCmd.p_inParameter = NULL;
 
-  //put message in Buffer
   ospErrorCode = osp_cmd_buffer (&ospCmd);
   if (ospErrorCode != OSP_NO_ERROR)
     {
       return ospErrorCode;
     }
 
-    spiError = send_and_receive_data_over_spi_blocking(ospCmd.p_outCmdBuffer, rspBuffer, ospCmd.outCmdBufferLength, ospCmd.outResponseLength);
+  spiError = send_and_receive_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
+                                                      rspBuffer,
+                                                      ospCmd.outCmdBufferLength,
+                                                      ospCmd.outResponseLength);
 
   if (spiError != NO_ERROR_SPI)
     {
@@ -116,18 +118,6 @@ enum OSP_ERROR_CODE osp_init_loop (uint16_t deviceAddress, ospInitRsp_t *p_rsp)
 
 /*****************************************************************************/
 /*****************************************************************************/
-/**
- * @fn enum OSP_ERROR_CODE osp_reset(uint16_t)
- * @brief
- * OSP_RESET command Performs a complete reset of one or all devices. The effect is identical to
- * a power cycle.All register values are set to their default values, all error flags are cleared,
- * the communication mode detection is restarted, LED drivers are turned off, and the address is
- * set to 0x3ff. The device enters the UNINITIALIZED mode.
- * For further details refer to "OSIRE_E3731i_Start_Up_Guide.pdf"
- *
- * @param deviceAddress 0..1000 RGBi device address (0: broadcast)
- * @return
- */
 enum OSP_ERROR_CODE osp_reset (uint16_t deviceAddress)
 {
   ospCmdBuffer_t ospCmd;
@@ -144,8 +134,9 @@ enum OSP_ERROR_CODE osp_reset (uint16_t deviceAddress)
       return ospErrorCode;
     }
 
-  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,ospCmd.outCmdBufferLength);
-// spiError = send_and_receive_data_over_spi_blocking (ospCmd.p_outCmdBuffer,uint8_t *p_bufferReceive,ospCmd.outCmdBufferLength,uint16_t countReceive);
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
+                                          ospCmd.outCmdBufferLength);
+
   if (spiError != NO_ERROR_SPI)
     {
       return OSP_ERROR_SPI;

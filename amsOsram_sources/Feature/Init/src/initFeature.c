@@ -122,7 +122,7 @@ void init_led_feature_blocking(bool setActive, bool storeOtpToFlash, uint16_t *p
 		if(*p_countLed >= 3)
 		{
 			uint32_t id;
-			osp_said_indentify (3, &id);
+			osp2_send_identify(3, &id);
 			if(id == 0x40)
 			{
 				osp2_send_clrerror(3); // all SAIDs have the V flag (over voltage) after reset, clear those
@@ -162,7 +162,7 @@ void init_led_feature_blocking(bool setActive, bool storeOtpToFlash, uint16_t *p
 		if(*p_countLed >= 3)
 		{
 			uint32_t id;
-			osp_said_indentify (3, &id);
+			osp2_send_identify(3, &id);
 			if(id == 0x40)
 			{
 				osp2_send_clrerror(3); // all SAIDs have the V flag (over voltage) after reset, clear those

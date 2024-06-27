@@ -28,13 +28,14 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../../amsOsram_sources/Hal/CY_Uart/inc/genericUart.h"
+#include <Hal/CY_Uart/inc/genericUart.h>
 
 #define GROUP_SETUP 0x00
 #define GROUP_PASSTHROUGH 0x01
 #define GROUP_OSPCOMMANDS 0x02
 #define GROUP_FEATURECOMMANDS 0x03
 #define GROUP_SCENARIO 0x04
+#define GROUP_FUNCTIONS 0x05
 #define GROUP_CONFIGURATION_UC 0x10
 #define GROUP_CONFIGURATION_EMULATOR 0x20
 #define GROUP_OSP_ERROR 0x7E
@@ -70,13 +71,27 @@ enum UART_MSG
 
 typedef union
 {
-  uint8_t buf[4];
+  uint8_t buf[17];
   struct
   {
     uint8_t deviceID;
     uint8_t group;
     uint8_t length;
     uint8_t byte_3;
+    uint8_t param1;
+    uint8_t param2;
+    uint8_t param3;
+    uint8_t param4;
+    uint8_t param5;
+    uint8_t param6;
+    uint8_t param7;
+    uint8_t param8;
+    uint8_t param9;
+    uint8_t param10;
+    uint8_t param11;
+    uint8_t param12;
+    uint8_t param13;
+
   } bit;
 } uartHeader_t;
 

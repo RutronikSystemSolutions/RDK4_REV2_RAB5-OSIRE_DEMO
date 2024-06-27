@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Crc/inc/crc.h>
-#include <amsOsram_sources/Hal/CY_Uart/inc/uart.h>
-#include <amsOsram_sources/Hal/Osire/inc/osire.h>
-#include <amsOsram_sources/Osp/inc/genericDevice.h>
-#include <amsOsram_sources/Osp/inc/osireDevice.h>
-#include <amsOsram_sources/UartProtocol/inc/ospCommands.h>
-#include <amsOsram_sources/UartProtocol/inc/uartProtocolHandler.h>
-#include <amsOsram_sources/Selectives/osp2/inc/osp2.h>
+#include <Crc/inc/crc.h>
+#include <Hal/Osire/inc/osire.h>
+#include <Hal/CY_Uart/inc/uart.h>
+#include <Osp/inc/genericDevice.h>
+#include <Osp/inc/osireDevice.h>
+#include <UartProtocol/inc/ospCommands.h>
+#include <UartProtocol/inc/uartProtocolHandler.h>
+#include <osp2/inc/osp2.h>
 
 void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
 {
@@ -35,10 +35,14 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
   deviceAddress = deviceAddress + *p_msg;
   uartStatus_t uartStatus;
   uartStatus.status = 0;
+  uint16_t addr;
+  addr =  (hdr.bit.param1 <<8) + hdr.bit.param2;
+
   enum OSP_ERROR_CODE ospErrorCode;
   switch (hdr.bit.byte_3)
     {
     case OSP_RESET:
+    {
       send_ack (hdr, uartStatus);
       hal_reset_osire_start ();
       ospErrorCode = osp_reset (deviceAddress);
@@ -47,9 +51,360 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
           send_nack (hdr);
           return;
         }
-
       hal_reset_osire_end ();
       return;
+
+    }
+
+    case OSP_GO_ACTIVE:
+    {
+      ospErrorCode = osp2_send_goactive (addr);
+
+      if (ospErrorCode != OSP_NO_ERROR)
+          send_nack (hdr);
+      else
+		  send_ack (hdr, uartStatus);
+      return;
+    }
+
+    case OSP_GO_SLEEP:
+    {
+      ospErrorCode = osp2_send_gosleep (addr);
+      if (ospErrorCode != OSP_NO_ERROR)
+          send_nack (hdr);
+      else
+		  send_ack (hdr, uartStatus);
+      return;
+    }
+
+    case OSP_GO_DEEP_SLEEP:
+    {
+      ospErrorCode = osp2_send_godeepsleep (addr);
+      if (ospErrorCode != OSP_NO_ERROR)
+          send_nack (hdr);
+      else
+		  send_ack (hdr, uartStatus);
+      return;
+    }
+
+    case OSP_CLRERROR:
+    {
+      ospErrorCode = osp2_send_clrerror (addr);
+      if (ospErrorCode != OSP_NO_ERROR)
+          send_nack (hdr);
+      else
+		  send_ack (hdr, uartStatus);
+      return;
+    }
+
+    case OSP_IDENTIFY:
+    {
+    	uint32_t id;
+    	uint8_t idcast;
+    	ospErrorCode = osp2_send_identify(addr, &id);
+		idcast = (uint8_t)id;
+    	uint8_t sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_ID;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] =  255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] =  idcast;
+        }
+
+        sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+
+    }
+
+    case OSP_READSTATUS:
+    {
+    	uint8_t status;
+    	ospErrorCode = osp2_send_readstat(addr, &status);
+
+    	uint8_t sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_ID;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] =  255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] =  status;
+        }
+
+        sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+
+    }
+
+    case OSP_READTEMP:
+    {
+    	uint8_t temp;
+    	ospErrorCode = osp2_send_readtemp(addr, &temp);
+
+        uint8_t sendBuffer[LENGTH_UART_STD + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_STD;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] =  255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] =  temp;
+        }
+        sendBuffer[LENGTH_UART_STD + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_STD + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_STD + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+    }
+
+    case OSP_SET_PWM:
+    {
+    	uint16_t red;
+    	uint16_t green;
+    	uint16_t blue;
+
+    	red = (hdr.bit.param4<< 8) + hdr.bit.param5;
+    	green = (hdr.bit.param6<< 8) + hdr.bit.param7;
+    	blue = (hdr.bit.param8<< 8) + hdr.bit.param9;
+    	ospErrorCode = osp2_send_setpwmchn(addr, hdr.bit.param3, red, green, blue);
+        if (ospErrorCode != OSP_NO_ERROR)
+            send_nack (hdr);
+        else
+		    send_ack (hdr, uartStatus);
+        return;
+    }
+
+    case OSP_SET_PWM_OS:
+    {
+    	uint16_t red;
+    	uint16_t green;
+    	uint16_t blue;
+    	uint8_t daytimes;
+
+    	red = (hdr.bit.param3<< 8) + hdr.bit.param4;
+    	green = (hdr.bit.param5<< 8) + hdr.bit.param6;
+    	blue = (hdr.bit.param7<< 8) + hdr.bit.param8;
+    	daytimes = hdr.bit.param9;
+    	ospErrorCode = osp2_send_setpwm(addr, red, green, blue, daytimes);
+        if (ospErrorCode != OSP_NO_ERROR)
+            send_nack (hdr);
+        else
+		    send_ack (hdr, uartStatus);
+        return;
+    }
+
+    case OSP_READ_PWM:
+    {
+    	uint8_t chn;
+    	uint16_t red;
+    	uint16_t green;
+    	uint16_t blue;
+
+    	chn = hdr.bit.param3;
+
+    	ospErrorCode = osp2_send_readpwmchn(addr, chn, &red, &green, &blue);
+
+    	uint8_t sendBuffer[LENGTH_UART_PWM + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+		sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+		sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+		sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_INIT;
+		sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+		if (ospErrorCode != OSP_NO_ERROR)
+		{
+			send_nack (hdr);
+			sendBuffer[UART_MSG_DATA0 + 1] = 255;
+			sendBuffer[UART_MSG_DATA0 + 2] = 255;
+			sendBuffer[UART_MSG_DATA0 + 3] = 255;
+			sendBuffer[UART_MSG_DATA0 + 4] = 255;
+			sendBuffer[UART_MSG_DATA0 + 5] = 255;
+			sendBuffer[UART_MSG_DATA0 + 6] = 255;
+		}
+		else
+		{
+			send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] = red>>8;
+			sendBuffer[UART_MSG_DATA0 + 2] = ((uint8_t) red ) & 0xFF;
+			sendBuffer[UART_MSG_DATA0 + 3] = green>>8;
+			sendBuffer[UART_MSG_DATA0 + 4] = ((uint8_t) green ) & 0xFF;
+			sendBuffer[UART_MSG_DATA0 + 5] = blue>>8;
+			sendBuffer[UART_MSG_DATA0 + 6] = ((uint8_t) blue ) & 0xFF;
+		}
+
+		sendBuffer[LENGTH_UART_PWM + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_PWM + LENGTH_UART_ANS_HEADER);
+		uart_send_data_blocking (sendBuffer, LENGTH_UART_PWM + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+		return;
+    }
+
+    case OSP_READTEMPSTAT:
+    {
+    	uint8_t temp;
+       	uint8_t status;
+       	ospErrorCode = osp2_send_readtempstat(addr, &temp, &status);
+
+       	uint8_t sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+           sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+           sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+           sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_16bit;
+           sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+           if (ospErrorCode != OSP_NO_ERROR)
+           {
+               send_nack (hdr);
+               sendBuffer[UART_MSG_DATA0 + 1] =  255;
+               sendBuffer[UART_MSG_DATA0 + 2] =  255;
+           }
+           else
+           {
+   		    send_ack (hdr, uartStatus);
+   			sendBuffer[UART_MSG_DATA0 + 1] =  temp;
+   			sendBuffer[UART_MSG_DATA0 + 2] =  status;
+           }
+
+           sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER);
+           uart_send_data_blocking (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+           return;
+
+       }
+
+    case OSP_READADC:
+    {
+    	uint8_t adc;
+    	ospErrorCode = osp2_send_ADCread(addr, &adc);
+
+    	uint8_t sendBuffer[LENGTH_UART_STD + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_STD;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] =  255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] =  adc;
+        }
+
+        sendBuffer[LENGTH_UART_STD + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_STD + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_STD + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+    }
+
+    case OSP_SETADC:
+    {
+
+    	ospErrorCode = osp2_send_setADC(addr, hdr.bit.param3);
+        if (ospErrorCode != OSP_NO_ERROR)
+            send_nack (hdr);
+        else
+		    send_ack (hdr, uartStatus);
+        return;
+    }
+
+    case OSP_READADCDATA:
+    {
+    	uint16_t adcdata;
+    	ospErrorCode = osp2_send_ADCdataread(addr, &adcdata);
+
+    	uint8_t sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_16bit;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] =  255;
+            sendBuffer[UART_MSG_DATA0 + 2] =  255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+			sendBuffer[UART_MSG_DATA0 + 1] =  adcdata >> 8;
+			sendBuffer[UART_MSG_DATA0 + 2] =  ((uint8_t) adcdata ) & 0xFF;
+        }
+
+        sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+    }
+
+    case OSP_READCURRCHANNEL:
+    {
+    	uint8_t flags;
+    	uint8_t rcur;
+		uint8_t gcur;
+		uint8_t bcur;
+    	ospErrorCode = osp2_send_readcurchn(addr, hdr.bit.param3, &flags, &rcur, &gcur, &bcur);
+
+        uint8_t sendBuffer[LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+        sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+        sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+        sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_INIT;
+        sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+
+        if (ospErrorCode != OSP_NO_ERROR)
+        {
+            send_nack (hdr);
+            sendBuffer[UART_MSG_DATA0 + 1] = 255;
+	        sendBuffer[UART_MSG_DATA0 + 2] = 255;
+	        sendBuffer[UART_MSG_DATA0 + 3] = 255;
+	        sendBuffer[UART_MSG_DATA0 + 4] = 255;
+        }
+        else
+        {
+		    send_ack (hdr, uartStatus);
+	        sendBuffer[UART_MSG_DATA0 + 1] = flags;
+	        sendBuffer[UART_MSG_DATA0 + 2] = rcur;
+	        sendBuffer[UART_MSG_DATA0 + 3] = gcur;
+	        sendBuffer[UART_MSG_DATA0 + 4] = bcur;
+        }
+
+        sendBuffer[LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER);
+        uart_send_data_blocking (sendBuffer, LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+        return;
+    }
+
+    case OSP_SETCURRCHANNEL:
+    {
+    	// osp2_send_setcurchn(uint16_t addr, uint8_t chn, uint8_t flags, uint8_t rcur, uint8_t gcur, uint8_t bcur ) {
+    	ospErrorCode =  osp2_send_setcurchn(addr, hdr.bit.param3, hdr.bit.param4,hdr.bit.param5, hdr.bit.param6, hdr.bit.param7);
+        if (ospErrorCode != OSP_NO_ERROR)
+            send_nack (hdr);
+        else
+		    send_ack (hdr, uartStatus);
+        return;
+    }
+
+
 
     case OSP_INIT_BIDIR:
       {
@@ -61,6 +416,7 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
             send_nack (hdr);
             return;
           }
+
 
         uint8_t sendBuffer[LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER
             + LENGTH_UART_ANS_CRC];
@@ -78,6 +434,7 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
         LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
         return;
       }
+
     case OSP_INIT_LOOP:
       {
         send_ack (hdr, uartStatus);
@@ -105,16 +462,134 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
         LENGTH_UART_INIT + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
         return;
       }
-    case OSP_GO_ACTIVE:
-      send_ack (hdr, uartStatus);
-      ospErrorCode = osp_go_active (deviceAddress);
-      if (ospErrorCode != OSP_NO_ERROR)
-        {
-          send_nack (hdr);
-          return;
-        }
 
-      return;
+//    case OSP_TESTPW:
+//      {
+//
+//    	  if(hdr.bit.param3 == 1)
+//			  ospErrorCode =  osp2_send_testpw(addr, 0x4247525F4143);
+//    	  else
+//			  ospErrorCode =  osp2_send_testpw(addr, 0b00001);
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//            send_nack (hdr);
+//          else
+//  		    send_ack (hdr, uartStatus);
+//          return;
+//      }
+//
+//    case OSP_TESTDATASET:
+//      {
+//    	  uint16_t payload_data;
+//
+//    	  payload_data = (hdr.bit.param3 & 0x1F) | (hdr.bit.param4 << 5);
+//
+//
+//		  ospErrorCode =  osp2_send_settestdata(addr, payload_data);
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//            send_nack (hdr);
+//          else
+//  		    send_ack (hdr, uartStatus);
+//          return;
+//      }
+//
+//    case OSP_SETI2CCFG:
+//      {
+//    	  uint8_t flags;
+//    	  uint8_t speed;
+//
+//    	  flags = hdr.bit.param3;
+//    	  speed = hdr.bit.param4;
+//
+//    	  ospErrorCode =  osp2_send_seti2ccfg(addr, flags, speed);
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//            send_nack (hdr);
+//          else
+//  		    send_ack (hdr, uartStatus);
+//          return;
+//      }
+//
+//    case OSP_READI2CCFG:
+//      {
+//    	  uint8_t flags;
+//    	  uint8_t speed;
+//
+//    	  ospErrorCode =  osp2_send_readi2ccfg(addr, &flags, &speed);
+//
+//
+//          uint8_t sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC] = {0};
+//          sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+//          sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+//          sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_16bit;
+//          sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//          {
+//              send_nack (hdr);
+//              sendBuffer[UART_MSG_DATA0 + 1] =  255;
+//              sendBuffer[UART_MSG_DATA0 + 2] =  255;
+//          }
+//          else
+//          {
+//  		    send_ack (hdr, uartStatus);
+//  	        sendBuffer[UART_MSG_DATA0 + 1] = flags;
+//  	        sendBuffer[UART_MSG_DATA0 + 2] = speed;
+//
+//          }
+//
+//          sendBuffer[LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER] = crc (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER);
+//          uart_send_data_blocking (sendBuffer, LENGTH_UART_16bit + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+//          return;
+//      }
+//
+//    case OSP_WRITEI2C:
+//      {
+//    	  uint8_t daddr7;
+//    	  uint8_t raddr;
+//    	  uint8_t buf_i2c[8];
+//    	  int size;
+//
+//    	  daddr7 = hdr.bit.param3;
+//    	  raddr = hdr.bit.param4;
+//    	  buf_i2c[0] = hdr.bit.param5;
+//    	  buf_i2c[1] = hdr.bit.param6;
+//    	  buf_i2c[2] = hdr.bit.param7;
+//    	  buf_i2c[3] = hdr.bit.param8;
+//    	  buf_i2c[4] = hdr.bit.param9;
+//    	  buf_i2c[5] = hdr.bit.param10;
+//    	  buf_i2c[6] = hdr.bit.param11;
+//    	  buf_i2c[7] = hdr.bit.param12;
+//    	  size = hdr.bit.param13;
+//
+//    	  ospErrorCode =  osp2_send_i2cwrite8(addr, daddr7, raddr, buf_i2c, size);
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//            send_nack (hdr);
+//          else
+//  		    send_ack (hdr, uartStatus);
+//          return;
+//      }
+//
+//    case OSP_READI2C:
+//      {
+//    	  uint8_t daddr7;
+//    	  uint8_t raddr;
+//    	  uint8_t num;
+//
+//    	  daddr7 = hdr.bit.param3;
+//    	  raddr = hdr.bit.param4;
+//    	  num = hdr.bit.param5;
+//
+//    	  ospErrorCode =  osp2_send_i2cread8(addr, daddr7, raddr, num );
+//
+//          if (ospErrorCode != OSP_NO_ERROR)
+//            send_nack (hdr);
+//          else
+//  		    send_ack (hdr, uartStatus);
+//          return;
+//      }
 
     case OSP_OSIRE_GO_ACTIVE_SR:
       {
@@ -161,36 +636,12 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
             pwmData.data.bit.green_curr = 0;
             pwmData.data.bit.blue_curr = 0;
           }
-
-        /*RAB5 AS1163*/
-		if(deviceAddress == 3)
-		{
-			uint32_t id;
-			osp_said_indentify (3, &id);
-			if(id == 0x40)
-			{
-				osp2_send_setpwmchn(3,0,pwmData.data.bit.red_pwm,pwmData.data.bit.green_pwm,pwmData.data.bit.blue_pwm);//address,channel,redpwm,greenpwm,bluepwm
-				osp2_send_setpwmchn(3,1,pwmData.data.bit.red_pwm,pwmData.data.bit.green_pwm,pwmData.data.bit.blue_pwm);//address,channel,redpwm,greenpwm,bluepwm
-			}
-			else
-			{
-		        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
-		        if (ospErrorCode != OSP_NO_ERROR)
-		          {
-		            send_nack (hdr);
-		            return;
-		          }
-			}
-		}
-		else
-		{
-	        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
-	        if (ospErrorCode != OSP_NO_ERROR)
-	          {
-	            send_nack (hdr);
-	            return;
-	          }
-		}
+        ospErrorCode = osp_osire_set_pwm (deviceAddress, pwmData);
+        if (ospErrorCode != OSP_NO_ERROR)
+          {
+            send_nack (hdr);
+            return;
+          }
 
         return;
       }
@@ -612,27 +1063,7 @@ void osp_commands (uint8_t *p_msg, uartHeader_t hdr)
         send_uart_temp_status (hdr, tempStatus);
         return;
       }
-    case OSP_GO_SLEEP:
-      send_ack (hdr, uartStatus);
-      ospErrorCode = osp_go_sleep (deviceAddress);
-      if (ospErrorCode != OSP_NO_ERROR)
-        {
-          send_nack (hdr);
-          return;
-        }
 
-      return;
-
-    case OSP_GO_DEEP_SLEEP:
-      send_ack (hdr, uartStatus);
-      ospErrorCode = osp_go_deep_sleep (deviceAddress);
-      if (ospErrorCode != OSP_NO_ERROR)
-        {
-          send_nack (hdr);
-          return;
-        }
-
-      return;
 
     case OSP_OSIRE_GO_SLEEP_SR:
       {
@@ -743,3 +1174,22 @@ void send_uart_temp_status (uartHeader_t hdr, osireTempStatus_t tempStatus)
   uart_send_data_blocking (sendBuffer,
   LENGTH_UART_TEMP_STATUS + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
 }
+
+void send_uart_identify (uartHeader_t hdr, uint8_t id)
+{
+  uint8_t sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER
+      + LENGTH_UART_ANS_CRC];
+
+  sendBuffer[UART_MSG_DEVICEID] = hdr.bit.deviceID;
+  sendBuffer[UART_MSG_GROUP] = GROUP_OSPCOMMANDS;
+  sendBuffer[UART_MSG_LENGTH] = LENGTH_UART_ID;
+  sendBuffer[UART_MSG_DATA0] = hdr.bit.byte_3;
+  sendBuffer[UART_MSG_DATA0 + 1] =  id;
+
+
+  sendBuffer[LENGTH_UART_ID + LENGTH_UART_ANS_HEADER] = crc (
+      sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER);
+  uart_send_data_blocking (sendBuffer,
+		  LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
+}
+

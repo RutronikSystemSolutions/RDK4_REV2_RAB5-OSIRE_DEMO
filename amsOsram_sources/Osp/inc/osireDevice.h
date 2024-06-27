@@ -37,7 +37,7 @@ extern "C"
 /**
  * Include OSP generic definitions and data structures
  */
-#include "../../../amsOsram_sources/Osp/inc/genericDevice.h"
+#include <Osp/inc/genericDevice.h>
 
 /*****************************************************************************/
 /*********************** defines *********************************************/
@@ -68,9 +68,6 @@ extern "C"
 #define LENGTH_READ_COMSTATUS_MSG 4
 #define LENGTH_READ_COMSTATUS_RSP 5
 /*****************************************************************************/
-#define LENGTH_READ_INDENTIFY_MSG 4
-#define LENGTH_READ_INDENTIFY_RSP 8
-/*****************************************************************************/
 #define LENGTH_READ_STATUS_MSG 4
 #define LENGTH_READ_STATUS_RSP 5
 /*****************************************************************************/
@@ -87,7 +84,6 @@ extern "C"
  */
 enum OSP_OSIRE_DEVICE_CMDS
 {
-  OSP_OSIRE_IDENTIFY = 0x07, /**< implemented */
   OSP_OSIRE_P4ERROR_BIDIR = 0x08, /**< implemented */
   OSP_OSIRE_CLR_ERROR_SR = 0x21, /**< implemented */
   OSP_OSIRE_GO_SLEEP_SR = 0x24, /**< implemented */
@@ -327,10 +323,8 @@ enum OSP_ERROR_CODE osp_osire_set_setup_and_sr (uint16_t deviceAddress,
  *
  * @return error, communication or command parameter error
  */
-enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t data);
-enum OSP_ERROR_CODE osp_said_indentify (uint16_t deviceAddress, uint32_t *id);
-enum OSP_ERROR_CODE osp_said_set_pwm (uint16_t deviceAddress, uint8_t channel, osirePwmData_t data);
-enum OSP_ERROR_CODE osp_said_set_curr (uint16_t deviceAddress);
+enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
+                                       osirePwmData_t data);
 
 /**
  * @brief OSP_OSIRE_SET_PWM_SR command and reads status and temperature
