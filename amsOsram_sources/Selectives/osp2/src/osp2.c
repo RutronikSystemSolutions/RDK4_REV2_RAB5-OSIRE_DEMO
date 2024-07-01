@@ -1961,9 +1961,9 @@ static osp2_error_t osp2_con_setcurchn(osp2_tele_t * tele, uint16_t addr, uint8_
   if( tele==0                    ) return OSP2_ERROR_OUTARGNULL;
   if( addr   > MAXIMUM_ADDRESS   ) return OSP2_ERROR_ADDR;
   if( flags  & ~0x07             ) return OSP2_ERROR_ADDR;
-  if( rcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
-  if( gcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
-  if( bcur   & ~0x0B             ) return OSP2_ERROR_ADDR;
+  if( rcur   > 0x0B             ) return OSP2_ERROR_ADDR;
+  if( gcur   > 0x0B             ) return OSP2_ERROR_ADDR;
+  if( bcur   > 0x0B             ) return OSP2_ERROR_ADDR;
   if( chn!=0 && chn!=1 && chn!=2 ) return OSP2_ERROR_ARG;
 
   // Set constants

@@ -30,7 +30,7 @@ extern "C"
 
 // ---- VARIABLES: -----------------------------------
 #define UART_TX_TIMEOUT_MS  10   // 10ms timeout
-#define UART_RX_TIMEOUT_MS  200  // 100ms timeout
+#define UART_RX_TIMEOUT_MS  100  // 100ms timeout
 
 // ---- METHODS: -----------------------------------
 
