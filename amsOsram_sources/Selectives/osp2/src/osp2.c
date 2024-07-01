@@ -1956,15 +1956,16 @@ osp2_error_t osp2_send_readcurchn(uint16_t addr, uint8_t chn, uint8_t *flags, ui
 
 // ==========================================================================
 // Telegram 51 SETCURCHN
-static osp2_error_t osp2_con_setcurchn(osp2_tele_t * tele, uint16_t addr, uint8_t chn, uint8_t flags, uint8_t rcur, uint8_t gcur, uint8_t bcur ) {
-  // Check input parameters
-  if( tele==0                    ) return OSP2_ERROR_OUTARGNULL;
-  if( addr   > MAXIMUM_ADDRESS   ) return OSP2_ERROR_ADDR;
-  if( flags  & ~0x07             ) return OSP2_ERROR_ADDR;
-  if( rcur   > 0x0B             ) return OSP2_ERROR_ADDR;
-  if( gcur   > 0x0B             ) return OSP2_ERROR_ADDR;
-  if( bcur   > 0x0B             ) return OSP2_ERROR_ADDR;
-  if( chn!=0 && chn!=1 && chn!=2 ) return OSP2_ERROR_ARG;
+static osp2_error_t osp2_con_setcurchn(osp2_tele_t * tele, uint16_t addr, uint8_t chn, uint8_t flags, uint8_t rcur, uint8_t gcur, uint8_t bcur )
+{
+  /* Check input parameters */
+  if( tele == NULL             ) 							return OSP2_ERROR_OUTARGNULL;
+  if( addr > MAXIMUM_ADDRESS   ) 							return OSP2_ERROR_ADDR;
+  if( flags  & ~0x07           ) 							return OSP2_ERROR_ARG;
+  if(((rcur > 0x04) && (rcur < 0x08)) || (rcur > 0x0B)) 	return OSP2_ERROR_ARG;
+  if(((gcur > 0x04) && (gcur < 0x08)) || (gcur > 0x0B)) 	return OSP2_ERROR_ARG;
+  if(((bcur > 0x04) && (bcur < 0x08)) || (bcur > 0x0B)) 	return OSP2_ERROR_ARG;
+  if( chn > 2 ) 											return OSP2_ERROR_ARG;
 
   // Set constants
   const uint8_t payloadsize = 3;
