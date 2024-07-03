@@ -2,7 +2,7 @@
 
 <img src="images/rdk4_rab5.jpg" style="zoom:15%;" />
 
-**NOTE:**  The current up to 100 mA may flow from the System Basis Chip [U1] TLE9262-3BQXV33 VCC2 LDO Ouput. In case more current is needed, please use RDK4 BATTERY supply terminals and switch to RECOM RPX-1.5Q power supply on RAB5-OSIRE board [Switch the jumper from pins 2 and 3 to pins 1 and 2 on the P2 port]. This would increase the current limit to 1.5A.
+**NOTE:**  The current up to 100 mA may flow from the System Basis Chip [U1] TLE9262-3BQXV33 VCC2 LDO Ouput. In case more current is needed, please use RDK4 BATTERY supply terminals J1 and J4 and switch to RECOM RPX-1.5Q power supply on RAB5-OSIRE board [Switch the jumper from pins 2 and 3 to pins 1 and 2 on the P2 port]. This would increase the current limit to 1.5A.
 
 ## Requirements
 
@@ -45,6 +45,8 @@ For more details, see the [Eclipse IDE for ModusToolbox&trade; software user gui
 
 ### Operation
 
+#### The ams OSRAM RGBi-GUI-MicroController software
+
 The firmware example uses KitProg3 UART to connect with ams OSRAM RGBi-GUI-MicroController software. Additionally, it has stand-alone modes that enable the control and demonstration of OSIRE LEDs. 
 
 - Connect the LED Stripe to the RDK4 as it is shown in a picture at the top of this document.
@@ -78,9 +80,20 @@ If you wish to use the demo without PC software, you may use the embedded exampl
 
 
 
+#### The Python Scripts
+
+The RAB5-OSIRE may be controlled with the RDK4 using a Python script that sends commands via KitProg3 UART. The RDK4 translates these commands into the OSP2.0 protocol and sends them to the SAID and OSIRE devices connected to the SIO interface.
+
+How to run with RDK4 Rev2 in Windows:
+
+- Program this code example to your RDK4 Rev2.
+- Install the [Python](https://www.python.org/downloads/).
+- Open the command prompt (administrator rights might be needed).
+- Go to your .py files directory, for example, *cd C:\Users\GDR\mtw\RDK4_REV2_RAB5-OSIRE_DEMO\pyscripts* and run the script: *python .\ RDK4_testing.py*
+
 ### Debugging
 
-If you successfully have imported the example, the debug configurations are already prepared to use with a the KitProg3 or MiniProg4. Open the ModusToolbox™ perspective and find the Quick Panel. Click on the desired debug launch configuration and wait for the programming to complete and the debugging process to start.
+If you successfully imported the example, the debug configurations are already prepared to use with the onboard debugger KitProg3. Open the ModusToolbox™ perspective and find the Quick Panel. Click on the debug launch configuration and wait for the programming to complete and the debugging process to start.
 
 <img src="images/debug_start.jpg" style="zoom:100%;" />
 
