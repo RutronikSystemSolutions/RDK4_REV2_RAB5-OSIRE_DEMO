@@ -140,7 +140,7 @@ void demo_control (void)
       if (check_flag_100ms ())
         {
           reset_flag_100ms ();
-          set_led_green (2); //Toggle green LED
+          //set_led_green (2); //Toggle green LED
         }
       break;
     case RUNNING_LIGHT:
