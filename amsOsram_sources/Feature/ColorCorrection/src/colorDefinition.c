@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Feature/ColorCorrection/inc/colorDefinition.h>
+#include "colorDefinition.h"
 
 void cxy2upvp (float cx, float cy, float *p_up, float *p_vp) // convert CIE cxy -> u'v'
 {

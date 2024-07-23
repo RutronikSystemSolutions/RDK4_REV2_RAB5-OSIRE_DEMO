@@ -18,62 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#include <amsOsram_sources/Feature/ColorCorrection/inc/colorCorrectionTest.h>
-#include <stddef.h>
+#ifndef FEATURE_COLORCORRECTION_INC_CALIBRATIONDATA_H_
+#define FEATURE_COLORCORRECTION_INC_CALIBRATIONDATA_H_
 
-#ifdef CPU_S32K144
-#include <Hal/Gpios/inc/pin.h>
-#else
-// define stub functions (for test)
-void set_debug_1(uint8_t val);
-void set_debug_2(uint8_t val);
-void set_led_red(uint8_t val);
-void set_led_green(uint8_t val);
-void set_led_blue(uint8_t val);
-#endif
+#include "colorCorrectionCoefficients.h"
 
-#ifdef TEST_COLOR_CORRECTION
+// values are defined in "calibrationData.c"
+extern const colorCorrFunCoef_t ColorCorrNightCoef;
+extern const colorCorrFunCoef_t ColorCorrDayCoef;
 
-// Global LED Status memory
-extern ledPwmCalc_t LEDSystemStatus[NUMBER_OF_DEVICES];
-XYZ_t T_XYZ; // target color
-
-#define NUMBER_OF_TEMPERATURES 11
-float TEMP_SWEEP[NUMBER_OF_TEMPERATURES] =
-  { -40, -20, -10, 0, 10, 25, 50, 85, 100, 110, 125 };
-
-void test_cc_sweep (XYZ_t *p_XYZ)
-{
-
-  // loop over temperatures
-  for (size_t i = 0; i < NUMBER_OF_TEMPERATURES; ++i)
-    {
-      float temp = TEMP_SWEEP[i];
-      // loop over devices
-      set_debug_2 (1);
-      for (size_t k = 0; k < NUMBER_OF_DEVICES; ++k)
-        {
-          set_debug_1 (1);
-          ledPwmCalc_t *p_led = &LEDSystemStatus[k];
-          pwm_t pwm;
-          CCError_t rc = XYZ2pwm (p_led, p_XYZ, temp, &pwm, 0);
-          set_debug_1 (0);
-          if (rc == NO_ERROR)
-            {
-              // green led
-              set_led_red (0);
-              set_led_green (1);
-            }
-          else
-            {
-              // red led
-              set_led_green (0);
-              set_led_red (1);
-
-            }
-        }
-      set_debug_2 (0);
-    }
-}
-
-#endif // TEST_COLOR_CORRECTION
+#endif /* FEATURE_COLORCORRECTION_INC_CALIBRATIONDATA_H_ */

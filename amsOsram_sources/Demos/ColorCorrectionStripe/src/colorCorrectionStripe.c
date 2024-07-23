@@ -20,7 +20,6 @@
 
 #include <amsOsram_sources/Demos/ColorCorrectionStripe/inc/colorCorrectionStripe.h>
 #include <amsOsram_sources/Feature/ColorCorrection/inc/colorCorrection.h>
-#include <amsOsram_sources/Feature/ColorCorrection/inc/colorCorrectionTest.h>
 #include <amsOsram_sources/Feature/Init/inc/initFeature.h>
 #include <amsOsram_sources/Hal/CY_Gpios/inc/pin.h>
 #include <amsOsram_sources/Hal/Osire/inc/osire.h>
@@ -152,7 +151,7 @@ void color_Correction_Stripe_Control (uint8_t withCorrection)
     case CALC_COLOR:
       {
         /*----------------------calc color based on temp---------------------*/
-        CCError_t rc = XYZ2pwm (&p_ledPwmCalcArray[ledActive], &tXYZ, tempFloat, &pwm, dayMode);
+        CCError_t rc = XYZ2pwm (p_ledPwmCalcArray[ledActive].XYZTyp, &tXYZ, tempFloat, &pwm, dayMode);
 
         if (rc != NO_ERROR)
           {

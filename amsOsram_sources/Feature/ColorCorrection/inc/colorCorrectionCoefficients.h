@@ -79,6 +79,9 @@ typedef struct
   corrFunCoef_t B;
 } colorCorrFunCoef_t;
 
+extern const colorCorrFunCoef_t ColorCorrNightCoef;
+extern const colorCorrFunCoef_t ColorCorrDayCoef;
+
 #ifdef __cplusplus
 }
 #endif
