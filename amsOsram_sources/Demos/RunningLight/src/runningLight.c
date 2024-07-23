@@ -93,7 +93,7 @@ void set_color(uint8_t color)
 	else
 	{
 		cxyY2XYZ(cx, cy, brightness, &tXYZ);
-		CCError_t rc = XYZ2pwm(p_ledPwmCalc, &tXYZ, 25, &pwm, dayMode); //138 => 25�C
+		CCError_t rc = XYZ2pwm(p_ledPwmCalc->XYZTyp, &tXYZ, 25, &pwm, dayMode); //138 => 25�C
 
 		if (rc != NO_ERROR)
 		{
