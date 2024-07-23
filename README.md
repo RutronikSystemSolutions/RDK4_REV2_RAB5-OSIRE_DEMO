@@ -13,6 +13,14 @@
 - [amsOSRAM GUI Access: ](https://www.osram.com/apps/downloadcenter/os/?path=%2Fos-files%2FSoftware%2FP002%2F) Please download the zip-file: P0002_F0003_20_12_2022. To un-zip, please use the following password: **qygy93Nf4x7vBxP8rnvS**
 - [AppNote OSIRE® E3731i](https://ams-osram.com/products/multi-chips/multi-color-leds/osram-osire-e3731i-krtbi-d2lm31-31)
 
+## Software and hardware on request
+
+For any software or hardware that is listed below please contact  [solutions@rutronik.com](mailto:solutions@rutronik.com)
+
+- The ams OSIRE® E3731i LED stripe with 20 LEDs on it. RUTRONIK Part No.: [LEDATV3196](https://www.rutronik24.com/product/ams_osram/osire_e3731i_ledstripe/22814309.html)
+- The ams OSRAM software "RGB-GUI-Microcontroller".
+- The source code for the colour correction algorithms.
+
 ## Using the code example
 
 Create the project and open it using one of the following:
