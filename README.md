@@ -1,6 +1,6 @@
 # RAB5-OSIRE and RGBi-GUI-MicroController Project
 
-<img src="images/rdk4_rab5.jpg" style="zoom:15%;" />
+<img src="images/rdk4_rab5.jpg" style="zoom:50%;" />
 
 **NOTE:**  The current up to 100 mA may flow from the System Basis Chip [U1] TLE9262-3BQXV33 VCC2 LDO Ouput. In case more current is needed, please use RDK4 BATTERY supply terminals J1 and J4 and switch to RECOM RPX-1.5Q power supply on RAB5-OSIRE board [Switch the jumper from pins 2 and 3 to pins 1 and 2 on the P2 port]. This would increase the current limit to 1.5A.
 
