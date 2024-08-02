@@ -10,6 +10,10 @@
 - [RDK4 Rev2.](https://www.rutronik24.com/product/rutronik/rdk4/20820197.html)
 - [AppNote OSIRE® E3731i](https://ams-osram.com/products/multi-chips/multi-color-leds/osram-osire-e3731i-krtbi-d2lm31-31)
 
+## Supported toolchains (make variable 'TOOLCHAIN')
+
+- GNU Arm&reg; Embedded Compiler v11.3.1 (`GCC_ARM`) - Default value of `TOOLCHAIN`
+
 ## Software and hardware on request
 
 For any software or hardware that is listed below please get in touch with solutions@rutronik.com
