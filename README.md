@@ -58,7 +58,7 @@ For more details, see the [Eclipse IDE for ModusToolbox&trade; software user gui
 
 The firmware example uses KitProg3 UART to connect with ams OSRAM RGBi-GUI-MicroController software. Additionally, it has stand-alone modes that enable the control and demonstration of OSIRE LEDs. 
 
-- Connect the LED Stripe to the RDK4 as it is shown in a picture at the top of this document.
+- Connect the LED Stripe to the RDK4 as it is shown in a picture at the top of this document and refer to the [User Manual](https://github.com/RutronikSystemSolutions/RAB5-OSIRE_Documents_and_GUI).
 
 - Connect the PC to your RDK’s USB KitProg3 terminal.
 
