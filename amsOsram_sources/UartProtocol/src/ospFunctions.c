@@ -86,7 +86,7 @@ void osp_functions (uint8_t *p_msg, uartHeader_t hdr)
 			return;
 		}
 
-	/*	case OSP_IDENTIFY:
+		case OSP_IDENTIFY:
 		{
 			uint32_t id;
 			uint8_t idcast;
@@ -113,6 +113,6 @@ void osp_functions (uint8_t *p_msg, uartHeader_t hdr)
 			uart_send_data_blocking (sendBuffer, LENGTH_UART_ID + LENGTH_UART_ANS_HEADER + LENGTH_UART_ANS_CRC);
 			return;
 
-		}*/
+		}
 	}
 }

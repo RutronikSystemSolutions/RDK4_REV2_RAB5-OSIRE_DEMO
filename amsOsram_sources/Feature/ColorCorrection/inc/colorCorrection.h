@@ -73,20 +73,19 @@ typedef enum
  *
  * \param p_XYZTyp pointer to Tristimulus values for all LED chips (red, green, blue) and current configurations (day, night)
  * \param p_T pointer to target color (tristimulus values X, Y, Z)
- * \param temp temperature in °C
+ * \param temp temperature in ï¿½C
  * \param p_pwm pointer to pwm result vector
  * \param dayMode true = day Mode, false = night Mode
  * \return CCError_t pwm calculation result status
  */
-CCError_t XYZ2pwm (DN_RGB_XYZ_t *p_XYZTyp, XYZ_t *p_T, float temp, pwm_t *p_pwm,
-                   bool dayMode); // calculate pwm for target p_T for led at temperature temp
+CCError_t XYZ2pwm (DN_RGB_XYZ_t *p_XYZTyp, XYZ_t *p_T, float temp, pwm_t *p_pwm, bool dayMode); // calculate pwm for target p_T for led at temperature temp
 
 /**
  * \brief calculate temperature compensated PWM values from cx, cy & Y
  *
  * \param p_XYZTyp pointer to Tristimulus values for all LED chips (red, green, blue) and current configurations (day, night)
  * \param p_T pointer to target color (CIE cx, cy & Y)
- * \param temp temperature in °C
+ * \param temp temperature in ï¿½C
  * \param p_pwm pointer to pwm result vector
  * \param dayMode true = day Mode, false = night Mode
  * \return CCError_t pwm calculation result status
@@ -99,7 +98,7 @@ CCError_t xyY2pwm (DN_RGB_XYZ_t *p_XYZTyp, xyY_t *p_T, float temp, pwm_t *p_pwm,
  *
  * \param p_XYZTyp pointer to Tristimulus values for all LED chips (red, green, blue) and current configurations (day, night)
  * \param p_T pointer to target color (CIE 1976 UCS u', v' & Y)
- * \param temp temperature in °C
+ * \param temp temperature in ï¿½C
  * \param p_pwm pointer to pwm result vector
  * \param dayMode true = day Mode, false = night Mode
  * \return CCError_t pwm calculation result status

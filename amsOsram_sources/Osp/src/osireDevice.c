@@ -109,8 +109,7 @@ enum OSP_ERROR_CODE osp_osire_set_setup_and_sr (uint16_t deviceAddress,
 
 /*****************************************************************************/
 /*****************************************************************************/
-enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
-                                       osirePwmData_t data)
+enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress, osirePwmData_t data)
 {
   ospCmdBuffer_t ospCmd;
   enum OSP_ERROR_CODE ospErrorCode;
@@ -126,8 +125,7 @@ enum OSP_ERROR_CODE osp_osire_set_pwm (uint16_t deviceAddress,
       return ospErrorCode;
     }
 
-  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer,
-                                          ospCmd.outCmdBufferLength);
+  spiError = send_data_over_spi_blocking (ospCmd.p_outCmdBuffer, ospCmd.outCmdBufferLength);
 
   if (spiError != NO_ERROR_SPI)
     {

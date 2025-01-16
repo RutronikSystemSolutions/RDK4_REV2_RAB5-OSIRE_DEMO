@@ -173,10 +173,9 @@ errorSpi_t restart_non_blocking_spi_send (void)
 uint8_t* get_pointer_next_message_non_blocking (errorSpi_t *p_err)
 {
 
-  errorCodeSpiNewMessage_t errorSPI = SPI_NO_NEW_MESSAGE;
+  errorCodeSpiNewMessage_t errorSPI;
 
-  uint8_t *p_messageBuffer = NULL;
-	 // hal_get_new_message (&errorSPI);
+  uint8_t *p_messageBuffer = hal_get_new_message (&errorSPI);
 
   if (errorSPI == SPI_NEW_MESSAGE_OK)
     {
@@ -192,8 +191,8 @@ uint8_t* get_pointer_next_message_non_blocking (errorSpi_t *p_err)
 }
 
 errorSpi_t spi_receive_control (void)
-{
-  spiReceiveStatusSlave_t status = 0;
+{ //Note: This function needs to be added to main.c if the non-blocking receive is used
+  spiReceiveStatusSlave_t status = hal_spi_receive_control ();
   errorSpi_t err = NO_ERROR_SPI;
 
   if (status == SPI_RECEIVE_ERROR_CORRUPT_DATA)
@@ -206,8 +205,10 @@ errorSpi_t spi_receive_control (void)
 
 void spi_receive_reset_buffer (void)
 {
+	hal_spi_receive_reset_buffer ();
 }
 
 void spi_receive_reset (void)
 {
+	hal_reset_spi_slave ();
 }

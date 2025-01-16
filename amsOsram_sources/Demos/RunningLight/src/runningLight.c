@@ -330,6 +330,7 @@ void running_light_control(runningLightVersion_t colorVersion)
 
 		initFeatureError_t init = 0;
 
+		Cy_SysLib_Delay(10);
 		init_led_feature_blocking(true, true, &countLed, &init);
 		init_feature_init_led_status_xyz_pointers(1, p_ledPwmCalc);
 
@@ -353,6 +354,7 @@ void running_light_control(runningLightVersion_t colorVersion)
 		set_color(colorVersion);
 		osp_osire_set_pwm_running_light(0, dataPwmReturn, true, delayMS);
 		set_led_green(0);
+		osp_go_active(0);
 		state = RUNNING_LIGHT_LOOP;
 		break;
 

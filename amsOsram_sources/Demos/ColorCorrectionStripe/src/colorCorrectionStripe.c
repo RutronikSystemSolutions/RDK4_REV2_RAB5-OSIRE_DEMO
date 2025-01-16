@@ -96,6 +96,7 @@ void color_Correction_Stripe_Control (uint8_t withCorrection)
           state = TARGET_COLOR_DEFINITION;
         }
 
+      osp_go_active(0);
       break;
 
     case TARGET_COLOR_DEFINITION:

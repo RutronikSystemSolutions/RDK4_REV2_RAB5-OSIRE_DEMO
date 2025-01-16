@@ -57,12 +57,12 @@ void uart_protocol_handler (rxUartStatus_t rxUartStatus, uint8_t *p_msg)
       send_ack (hdr, uartStatus);
       return;
     }
-//  if (crc (p_msg, (hdr.bit.length + 4)) != 0) // Check if CRC is right
-//    {
-//      uartStatus.bit.crc_err = 1;
-//      send_ack (hdr, uartStatus);
-//      return;
-//    }
+  if (crc (p_msg, (hdr.bit.length + 4)) != 0) // Check if CRC is right
+    {
+      uartStatus.bit.crc_err = 1;
+      send_ack (hdr, uartStatus);
+      return;
+    }
 
   if (hdr.bit.deviceID == BROADCAST_ID) // Broadcast for Device_ID
     {

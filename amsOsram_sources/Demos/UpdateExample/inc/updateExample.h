@@ -18,24 +18,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.      *
  *****************************************************************************/
 
-#ifndef COMMON_INC_OSIREEVKDEFINES_H
-#define COMMON_INC_OSIREEVKDEFINES_H
-
 #ifdef __cplusplus
 extern "C"
   {
 #endif
 
-#define UNUSED(x) x=x
+#ifndef DEMOS_UPDATEEXAMPLE_INC_UPDATEEXAMPLE_H_
+#define DEMOS_UPDATEEXAMPLE_INC_UPDATEEXAMPLE_H_
 
-#define OSIRE_EVK_VERSION 2.0.2
+#include <stdint.h>
+#include <stdbool.h>
 
-#define FW_VERSION_MAJOR    2
-#define FW_VERSION_MINOR    1
-#define FW_VERSION_REVISION 1
+typedef enum
+{
+  UE_INIT,
+  UE_CALC,
+  UE_SEND_DATA,
+  UE_READ_OUT,
+  UE_WAIT_FOR_DATA,
+  UE_WAIT,
+  UE_ERROR
+} updateExampleStates_t;
+
+typedef enum
+{
+  UE_START_WITH_DEFAULT_VALUES = 0,
+  UE_START_WITH_COLOR_NIGHT_MODE,
+  UE_CHANGE_COLOR_NIGHT_MODE,
+  UE_CHANGE_COLOR_DAY_MODE
+} updateExampleModeUart_t;
+
+void reset_update_example (void);
+void update_example_init (void);
+void update_example_control (void);
+void change_color_update_example (float cx, float cy, float mcd,
+bool dayModeSetting);
+
+#endif /* DEMOS_UPDATEEXAMPLE_INC_UPDATEEXAMPLE_H_ */
 
 #ifdef __cplusplus
-  }
+}
 #endif
-
-#endif /* COMMON_INC_OSIREEVKDEFINES_H */

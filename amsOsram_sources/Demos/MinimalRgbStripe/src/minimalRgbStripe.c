@@ -96,6 +96,7 @@ void minimal_rgb_stripe_control (void)
         }
 
       set_led_green (0);
+      osp_go_active(0);
       break;
     case MIN_RGB_ERROR:
       /*-----------------------Error-----------------------------------------*/

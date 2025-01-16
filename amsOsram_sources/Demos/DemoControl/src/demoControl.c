@@ -7,9 +7,9 @@
 
 #include <amsOsram_sources/Demos/ColorCorrectionStripe/inc/colorCorrectionStripe.h>
 #include <amsOsram_sources/Demos/DemoControl/inc/demoControl.h>
-#include <amsOsram_sources/Demos/DemoControl/inc/demoControl.h>
 #include <amsOsram_sources/Demos/MinimalRgbStripe/inc/minimalRgbStripe.h>
 #include <amsOsram_sources/Demos/RunningLight/inc/runningLight.h>
+#include <amsOsram_sources/Demos/UpdateExample/inc/updateExample.h>
 #include <amsOsram_sources/Feature/ColorCorrection/inc/ledPwmCalc.h>
 #include <amsOsram_sources/Hal/Button/inc/button.h>
 #include <amsOsram_sources/Hal/CY_Gpios/inc/pin.h>
@@ -32,6 +32,7 @@ void reset_modi (void)
   reset_color_correction ();
   reset_store_xyz_to_flash ();
   reset_running_light_control ();
+  reset_update_example ();
   set_led_green (0);
   set_led_red (0);
   set_led_blue (0);
@@ -82,6 +83,32 @@ bool start_runningLight_mode (uint8_t version)
     }
 
   return (returnVal);
+}
+
+/*****************************************************************************/
+/*****************************************************************************/
+void start_update_example_mode (uint8_t modeInt, float cx, float cy, float mcd)
+{
+  updateExampleModeUart_t mode = (updateExampleModeUart_t) modeInt;
+
+  if ((mode == UE_START_WITH_DEFAULT_VALUES)
+      || (mode == UE_START_WITH_COLOR_NIGHT_MODE))
+    {
+      reset_modi ();
+      state = UPDATE_RATE_EXAMPLE;
+    }
+
+  if (mode != UE_START_WITH_DEFAULT_VALUES)
+    {
+      if (mode == UE_CHANGE_COLOR_DAY_MODE)
+        {
+          change_color_update_example (cx, cy, mcd, true);
+        }
+      else
+        {
+          change_color_update_example (cx, cy, mcd, false);
+        }
+    }
 }
 
 /*****************************************************************************/
@@ -154,6 +181,9 @@ void demo_control (void)
         }
       running_light_control (runningLightVersion);
 
+      break;
+    case UPDATE_RATE_EXAMPLE:
+      update_example_control ();
       break;
     default:
       state = MINIMAL_RGBI;

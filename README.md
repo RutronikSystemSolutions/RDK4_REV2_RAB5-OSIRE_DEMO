@@ -2,13 +2,14 @@
 
 <img src="images/rdk4_rab5.jpg" style="zoom:50%;" />
 
-**NOTE:**  The current up to 100 mA may flow from the System Basis Chip [U1] TLE9262-3BQXV33 VCC2 LDO Ouput. In case more current is needed, please use RDK4 BATTERY supply terminals J1 and J4 and switch to RECOM RPX-1.5Q power supply on RAB5-OSIRE board [Switch the jumper from pins 2 and 3 to pins 1 and 2 on the P2 port]. This would increase the current limit to 1.5A.
+**NOTE:**  The current up to 100 mA may flow from the System Basis Chip [U1] TLE9262-3BQXV33 VCC2 LDO +5V Output. In case more current is needed, please use RDK4 BATTERY supply terminals J1 and J4 and switch to RECOM RPX-1.5Q power supply on RAB5-OSIRE board [Switch the jumper from pins 2 and 3 to pins 1 and 2 on the P2 port]. This would increase the current limit to 1.5A.
 
 ## Requirements
 
 - [ModusToolbox™ software](https://www.cypress.com/products/modustoolbox-software-environment) v3.2
 - [RDK4 Rev2.](https://www.rutronik24.com/product/rutronik/rdk4/20820197.html)
 - [AppNote OSIRE® E3731i](https://ams-osram.com/products/multi-chips/multi-color-leds/osram-osire-e3731i-krtbi-d2lm31-31)
+- The ams OSRAM software "[RGB-GUI-Microcontroller](https://github.com/RutronikSystemSolutions/RAB5-OSIRE_Documents_and_GUI)" 1.2.0.
 
 ## Supported toolchains (make variable 'TOOLCHAIN')
 
@@ -19,7 +20,6 @@
 For any software or hardware that is listed below please get in touch with solutions@rutronik.com
 
 - The ams OSIRE® E3731i LED stripe with 20 LEDs on it. RUTRONIK Part No.: [LEDATV3196](https://www.rutronik24.com/product/ams_osram/osire_e3731i_ledstripe/22814309.html)
-- The ams OSRAM software "RGB-GUI-Microcontroller".
 - The source code for the colour correction algorithms.
 
 ## Using the code example
@@ -84,8 +84,9 @@ If you wish to use the demo without PC software, you may use the embedded exampl
 
 - By default, the „MinimalRGB“ demo is always engaged from the startup.
 - Touch the CSB1 once and you will get into „ColorCorrectionStripe“ mode. The USER LED on the RDK4 will start blinking in YELLOW. From this point, the user needs to decide if he needs to read all the OTP memory from every OSIRE LED and store it in the microcontroller memory or not. If you are running this demo for the first time – this is necessary. So to do that please touch the CSB3 button gently and wait until the USER LED starts blinking in GREEN. Press the CSB1 now and the demo will start. If the memory has been saved previously, you only need to keep pressing the CSB1 and you will get to this mode finally.
-- If you touch the CSB1 further – you will get into the „RunningLights“ mode. You will see how the stripe is changing the colours sequentially for every LED, they are updated once per 10 milliseconds. 
-- By touching and holding the CSB1 will get you back to the „MinimalRGB“ demo.
+- If you touch the CSB1 further – you will get into the „RunningLights“ mode. You will see how the stripe is changing the colours sequentially for every LED, they are updated once per 10 milliseconds. You may also touch the CSB3 to switch fast or slowly and "night" or "day" fading white light.
+- If you touch the CSB1 further – you will get into the „10 ms Color Demo “ mode. The colours are corrected according to the temperature every 10 ms. The colours, brightness and Night/Day mode can be adjusted using the GUI.
+- By touching the CSB1 once more you will get back to the „MinimalRGB“ demo.
 
 
 
@@ -98,7 +99,8 @@ How to run with RDK4 Rev2 in Windows:
 - Program this code example to your RDK4 Rev2.
 - Install the [Python](https://www.python.org/downloads/).
 - Open the command prompt (administrator rights might be needed).
-- Go to your .py files directory, for example, *cd C:\Users\GDR\mtw\RDK4_REV2_RAB5-OSIRE_DEMO\pyscripts* and run the script: *python .\ RDK4_testing.py*
+- Go to your .py files directory, for example, *cd C:\Users\GDR\mtw\RDK4_REV2_RAB5-OSIRE_DEMO\pyscripts*
+- Run the script: *python .\RDK4_testing.py*
 
 ### Debugging
 

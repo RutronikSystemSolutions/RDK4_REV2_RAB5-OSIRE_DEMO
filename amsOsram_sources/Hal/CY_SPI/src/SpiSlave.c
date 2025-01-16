@@ -460,11 +460,11 @@ uint8_t* hal_get_new_message (errorCodeSpiNewMessage_t *p_error)
 {
   uint8_t i = 0, j = 0;
   uint8_t *p_return = NULL;
-  //lastReadMessage;
+  lastReadMessage = 0;
 
   *p_error = SPI_NO_NEW_MESSAGE;
 
-  //j = lastReadMessage;
+  j = lastReadMessage;
 
   for (; i < COUNT_MESSAGE; i++)
     {
@@ -475,7 +475,7 @@ uint8_t* hal_get_new_message (errorCodeSpiNewMessage_t *p_error)
 
       if (messageRead[j] == false)
         {
-          //lastReadMessage = j;
+          lastReadMessage = j;
           messageRead[j] = true;
           *p_error = SPI_NEW_MESSAGE_OK;
           p_return = messageBuffer[j];
