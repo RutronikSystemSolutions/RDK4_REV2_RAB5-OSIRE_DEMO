@@ -62,12 +62,12 @@
                 <Block location="ioss[0].port[2].pin[6]">
                     <Aliases>
                         <Alias value="CYBSP_A6"/>
+                        <Alias value="ARD_IO7"/>
                     </Aliases>
                 </Block>
                 <Block location="ioss[0].port[2].pin[7]">
                     <Aliases>
                         <Alias value="CYBSP_A7"/>
-                        <Alias value="ARD_IO7"/>
                     </Aliases>
                 </Block>
                 <Block location="ioss[0].port[3].pin[1]">
