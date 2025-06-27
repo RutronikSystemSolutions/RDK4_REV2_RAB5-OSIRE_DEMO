@@ -6,7 +6,7 @@
 
 ## Requirements
 
-- [ModusToolbox™ software](https://www.cypress.com/products/modustoolbox-software-environment) v3.2
+- [ModusToolbox™ software](https://www.cypress.com/products/modustoolbox-software-environment) v2025.4.0
 - [RDK4 Rev2.](https://www.rutronik24.com/product/rutronik/rdk4/20820197.html)
 - [AppNote OSIRE® E3731i](https://ams-osram.com/products/multi-chips/multi-color-leds/osram-osire-e3731i-krtbi-d2lm31-31)
 - The ams OSRAM software "[RGB-GUI-Microcontroller](https://github.com/RutronikSystemSolutions/RAB5-OSIRE_Documents_and_GUI)" 1.2.0.
